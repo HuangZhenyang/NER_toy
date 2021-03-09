@@ -302,9 +302,6 @@ def generate_dict(file_path: str, save_file_name: str) -> None:
     print(f"[i] 已保存到文件{save_path}")
 
 
-
-
-
 if __name__ == '__main__':
     # train_sentence_list, train_label_list = load_sentences(train_file)
     # train_id2label, train_label2id = label_encoder(train_label_list)  # 这个好像没什么用
