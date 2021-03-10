@@ -187,17 +187,16 @@ class BatchLoader(object):
 
         for sentence_fea_matrix in batch_data:  # 对于原始batch_data中每个句子的特征矩阵
             word, label, flag, bound, radical, pinyin = sentence_fea_matrix  # 分别获取每个句子的特征矩阵
+            padding_part = [0] * (max_length - len(word))  # 根据长度决定需要填充内容的长度
+            # 对当前句子的不同特征向量进行padding，并添加到相应的特征矩阵中
+            word_list.append(word + padding_part)
+            label_list.append(label + padding_part)
+            flag_list.append(flag + padding_part)
+            bound_list.append(bound + padding_part)
+            radical_list.append(radical + padding_part)
+            pinyin_list.append(pinyin + padding_part)
 
-            padding = [0] * (max_length - len(word))  # 根据长度决定需要填充内容的长度
-
-            word_list.append(word + padding)
-            label_list.append(label + padding)
-            flag_list.append(flag + padding)
-            bound_list.append(bound + padding)
-            radical_list.append(radical + padding)
-            pinyin_list.append(pinyin + padding)
-
-        padded_batch_data = [word_list, label_list, bound_list, flag_list, radical_list, pinyin_list]
+        padded_batch_data = [word_list, label_list, flag_list, bound_list, radical_list, pinyin_list]
 
         return padded_batch_data
 
@@ -229,4 +228,4 @@ if __name__ == '__main__':
     # prepare_data("train")
     batch_loader = BatchLoader(10, "prepared_data")
     one_batch = torch.tensor(next(batch_loader.iter_batch()))
-    print(one_batch)
+    print(one_batch[3])
