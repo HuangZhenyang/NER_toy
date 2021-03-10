@@ -19,7 +19,7 @@ from data_loader import *
 
 # 参数配置
 config_obj = {
-    # embedding dimension
+    # embeds_list dimension
     "word_embed_dim": 100,
     "flag_embed_dim": 50,
     "bound_embed_dim": 50,
@@ -84,13 +84,17 @@ class BiLSTMCRF(nn.Module):
         Returns:
 
         """
-        embedding = []  # batch_data中各个特征嵌入后的矩阵
-        # 对于batch_data中的每一个特征矩阵：[batch_size, 单个句子在该特征上的向量长度]
-        for i, fea in enumerate(map_dict.keys()):
+        embeds_list = []  # batch_data中各个特征嵌入后的矩阵
+        # 对于batch_data中的每一个特征矩阵：[batch_size, fea_dim]
+        for i, fea in enumerate(self.map_dict.keys()):
             if fea == "label":
                 continue
-            embeds = self.embed_dict[fea](batch_data[i])  # [batch_size, 单个句子在该特征上的向量长度, embed_dim]
-            embedding.append(embeds)
+            embeds = self.embed_dict[fea](batch_data[i])  # [batch_size, fea_dim, embed_dim]
+            embeds_list.append(embeds)
+        
+        batch_embed = torch.cat(embeds_list, -1)
+
+        return batch_embed
 
 
 if __name__ == '__main__':
@@ -99,5 +103,5 @@ if __name__ == '__main__':
 
     model = BiLSTMCRF(map_dict, config_obj)
     batch_loader = BatchLoader(10, "prepared_data")
-    batch_data = torch.tensor(next(batch_loader.iter_batch()))
-    model.embed_concat(batch_data)
+    one_batch_data = torch.tensor(next(batch_loader.iter_batch()))
+    model.embed_concat(one_batch_data)
