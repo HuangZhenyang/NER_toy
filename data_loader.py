@@ -14,6 +14,8 @@ import pickle
 import os
 import pandas as pd
 from tqdm import tqdm
+import math
+import random
 
 
 # 全局变量
@@ -30,7 +32,7 @@ def prepare_sequence(seq: list, item2id: dict) -> list:
     Returns:
 
     """
-    idx_list = [item2id[word] if word in item2id else item2id["UNK"] for word in seq]
+    idx_list = [item2id[fea_val] if fea_val in item2id else item2id["UNK"] for fea_val in seq]
 
     # return torch.tensor(idx_list, dtype=torch.long)
     return idx_list
@@ -49,8 +51,6 @@ def prepare_data(file_name="train") -> None:
         None
     """
     print("[i] 准备数据，将提取的特征转换为数值下标，并进行数据增强")
-
-    result_data_list = []  # 保存所有处理好的数据
 
     # 读取特征映射字典
     with open("./data/map_dict.pkl", "rb") as f:
@@ -101,15 +101,132 @@ def prepare_data(file_name="train") -> None:
                            range(len(first_matrix))]  # 将对应维度的特征数据进行拼接
         three_sen_fea_list.append(enhanced_matrix)
 
-    result_data_list.extend(one_sen_fea_list + two_sen_fea_list + three_sen_fea_list)
+    # 通过extend将所有的数据都合在一起
+    # [
+    #   [[word特征值],[label特征值],...,[pinyin特征值]]_{句子1},
+    #   [[word特征值],[label特征值],...,[pinyin特征值]]_{句子2}, ...
+    #   [[word特征值],[label特征值],...,[pinyin特征值]]_{增强的句子1}, ...
+    # ]
+    prepared_data_list = []  # 保存所有处理好的数据
+    prepared_data_list.extend(one_sen_fea_list + two_sen_fea_list + three_sen_fea_list)
 
     # 保存到文件中
-    save_file_path = os.path.join(data_root_dir, "enhanced_data.pkl")
+    save_file_path = os.path.join(data_root_dir, "prepared_data.pkl")
     print(f"[i] 保存数据到文件{save_file_path}中...")
     with open(save_file_path, "wb") as f:
-        pickle.dump(result_data_list, f)
+        pickle.dump(prepared_data_list, f)
     print(f"[i] 保存完毕")
 
 
+class BatchLoader(object):
+    """
+    加载batch数据的工具类
+    """
+
+    def __init__(self, batch_size, file_name="prepared_data"):
+        """
+        类初始化函数
+
+        Args:
+            batch_size: 一个batch的样本数
+            dir_name: 训练集/测试集的文件夹名称
+        """
+        self.batch_size = batch_size
+        self.file_name = file_name
+        file_path = os.path.join(data_root_dir, file_name + ".pkl")
+        print(f"[i] 读取文件: {file_path}")
+        with open(file_path, "rb") as f:
+            self.data = pickle.load(f)
+        self.batch_data_list = self.sort_and_pad()
+        self.batch_data_list_len = len(self.batch_data_list)
+
+    def sort_and_pad(self) -> list:
+        """
+        按照句子的长度进行排序，使得长度相近的句子排在一起，避免太长和太短的句子放到一个batch，导致短句padding得太多
+
+        Returns:
+            batch_data_list: 每个batch数据的集合列表
+        """
+        num_of_batch = int(math.ceil(len(self.data) / self.batch_size))  # batch的数量，一共有多少个batch
+        sorted_data = sorted(self.data, key=lambda x: len(x[0]))  # 按照句子长度进行排序
+        batch_data_list = []
+
+        for i in range(num_of_batch):
+            batch_data = sorted_data[
+                         i * int(self.batch_size): (i + 1) * int(self.batch_size)]  # 按照batch_size从排序后的句子数据集中获取数据
+            padded_batch_data = self.pad_data(batch_data)  # 按照该batch中最长句子的长度进行padding操作
+            batch_data_list.append(padded_batch_data)
+
+        return batch_data_list
+
+    @staticmethod
+    def pad_data(batch_data: list) -> list:
+        """
+        对每个bacth的数据进行填充，然后返回一个batch的数据list
+
+        Args:
+            batch_data: 一个batch的数据，需要根据最长的句子的长度进行填充
+
+        Returns:
+            padded_batch_data: 返回一个对该batch中各个特征都进行填充以后的batch数据
+                               [
+                                 [ [填充后的句子1的word向量], [填充后的句子2的word特征], ...],
+                                 [ [填充后的句子1的label向量], [填充后的句子2的label向量], ...],
+                                 [ [填充后的句子1的flag向量], [填充后的句子2的flag向量], ...],
+                                 ...,
+                                 [ [填充后的句子1的pinyin向量], [填充后的句子2的pinyin向量], ...]
+                               ]
+        """
+        word_list = []
+        label_list = []
+        flag_list = []
+        bound_list = []
+        radical_list = []
+        pinyin_list = []
+        max_length = max([len(sentence[0]) for sentence in batch_data])  # 当前batch中最大的句子长度
+
+        for sentence_fea_matrix in batch_data:  # 对于原始batch_data中每个句子的特征矩阵
+            word, label, flag, bound, radical, pinyin = sentence_fea_matrix  # 分别获取每个句子的特征矩阵
+
+            padding = [0] * (max_length - len(word))  # 根据长度决定需要填充内容的长度
+
+            word_list.append(word + padding)
+            label_list.append(label + padding)
+            flag_list.append(flag + padding)
+            bound_list.append(bound + padding)
+            radical_list.append(radical + padding)
+            pinyin_list.append(pinyin + padding)
+
+        padded_batch_data = [word_list, label_list, bound_list, flag_list, radical_list, pinyin_list]
+
+        return padded_batch_data
+
+    def iter_batch(self, shuffle=False) -> list:
+        """
+        返回一个batch的数据
+
+        Args:
+            shuffle: 是否需要打乱数据
+
+        Returns:
+            list: 一batch的数据
+                [
+                    [ [填充后的句子1的word向量], [填充后的句子2的word特征], ...],
+                    [ [填充后的句子1的label向量], [填充后的句子2的label向量], ...],
+                    [ [填充后的句子1的flag向量], [填充后的句子2的flag向量], ...],
+                    ...,
+                    [ [填充后的句子1的pinyin向量], [填充后的句子2的pinyin向量], ...]
+                ]
+        """
+        if shuffle:
+            random.shuffle(self.batch_data_list)
+
+        for i in range(self.batch_data_list_len):
+            yield self.batch_data_list[i]
+
+
 if __name__ == '__main__':
-    prepare_data("train")
+    # prepare_data("train")
+    batch_loader = BatchLoader(10, "prepared_data")
+    one_batch = torch.tensor(next(batch_loader.iter_batch()))
+    print(one_batch)
