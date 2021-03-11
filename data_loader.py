@@ -200,6 +200,22 @@ class BatchLoader(object):
 
         return padded_batch_data
 
+    def split_fea_label(self, one_batch_data, label_idx=1):
+        """
+        将一个batch中的数据和label分开
+
+        Args:
+            one_batch_data: 一个batch的数据
+            label_idx: label在该batch中的索引
+
+        Returns:
+
+        """
+        fea_data = one_batch_data[0:label_idx] + one_batch_data[label_idx+1:]
+        label_data = one_batch_data[label_idx:label_idx+1]
+
+        return fea_data, label_data
+
     def iter_batch(self, shuffle=False) -> list:
         """
         返回一个batch的数据
@@ -208,24 +224,31 @@ class BatchLoader(object):
             shuffle: 是否需要打乱数据
 
         Returns:
-            list: 一batch的数据
+            fea_data: 一batch的数据
                 [
                     [ [填充后的句子1的word向量], [填充后的句子2的word特征], ...],
-                    [ [填充后的句子1的label向量], [填充后的句子2的label向量], ...],
+
                     [ [填充后的句子1的flag向量], [填充后的句子2的flag向量], ...],
                     ...,
                     [ [填充后的句子1的pinyin向量], [填充后的句子2的pinyin向量], ...]
+                ]
+
+            label_data:
+                [
+                    [ [填充后的句子1的label向量], [填充后的句子2的label向量], ...]
                 ]
         """
         if shuffle:
             random.shuffle(self.batch_data_list)
 
         for i in range(self.batch_data_list_len):
-            yield self.batch_data_list[i]
+            one_batch_data = self.batch_data_list[i]
+            fea_data, label_data = self.split_fea_label(one_batch_data, 1)
+            yield fea_data, label_data
 
 
 if __name__ == '__main__':
     # prepare_data("train")
     batch_loader = BatchLoader(10, "prepared_data")
-    one_batch = torch.tensor(next(batch_loader.iter_batch()))
-    print(one_batch[3])
+    fea_data, label_data = next(batch_loader.iter_batch())
+    print(len(fea_data), "\n\n", label_data)

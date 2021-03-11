@@ -45,7 +45,7 @@ if __name__ == '__main__':
     with open("./data/map_dict.pkl", "rb") as f:
         map_dict = pickle.load(f)
         for each in map_dict:
-            print(each)
+            print(map_dict[each][1])
             print(len(map_dict[each][1]))
 
 

@@ -241,7 +241,7 @@ def feature_encoder(feature_val_list: list, threshold=10, is_word=False, sep="se
         counter.pop(sep)
 
     if is_word:
-        counter["PAD"] = 100000001  # 句子长度不一致时，用PAD填充，保证一个batch中样本的长度一致
+        counter["PAD"] = 100000001  # 句子长度不一致时，用PAD填充，保证一个batch中样本的长度一致，将其设的很大，从而保证排序以后下标为0
         counter["UNK"] = 100000000
         feature_val_list = sorted(counter.items(), key=lambda x: x[1], reverse=True)
         feature_val_list = [x[0] for x in feature_val_list if x[1] >= threshold]
