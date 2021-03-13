@@ -27,6 +27,8 @@ data_root_dir = "./data/"
 train_file = "./data/NER_toy_data/train.txt"
 valid_file = "./data/NER_toy_data/valid.txt"
 test_file = "./data/NER_toy_data/test.txt"
+START_TAG = '<START>'
+STOP_TAG = '<STOP>'
 
 
 def load_sentences(file_path: str) -> tuple:
@@ -248,6 +250,8 @@ def feature_encoder(feature_val_list: list, threshold=10, is_word=False, sep="se
         id2item = feature_val_list
         item2id = {id2item[i]: i for i in range(len(id2item))}
     elif is_label:
+        counter[START_TAG] = -100000000
+        counter[STOP_TAG] = -100000001
         feature_val_list = sorted(counter.items(), key=lambda x: x[1], reverse=True)
         feature_val_list = [x[0] for x in feature_val_list]
         id2item = feature_val_list

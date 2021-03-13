@@ -119,6 +119,7 @@ class BiLSTM_CRF(nn.Module):
             score = score + \
                 self.transitions[tags[i + 1], tags[i]] + feat[tags[i + 1]]
         score = score + self.transitions[self.tag_to_ix[STOP_TAG], tags[-1]]
+        print(f"[i] P_{{realpath}} = \n\t{score}")
         return score
 
     def _viterbi_decode(self, feats):
@@ -169,6 +170,7 @@ class BiLSTM_CRF(nn.Module):
         feats = self._get_lstm_features(sentence)
         forward_score = self._forward_alg(feats)
         gold_score = self._score_sentence(feats, tags)
+        print(forward_score, gold_score)
         return forward_score - gold_score
 
     def forward(self, sentence):  # dont confuse this with _forward_alg above.
@@ -237,4 +239,5 @@ for epoch in range(
 with torch.no_grad():
     precheck_sent = prepare_sequence(training_data[0][0], word_to_ix)
     print(model(precheck_sent))
+    print(model.forward(precheck_sent))
 # We got it!

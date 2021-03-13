@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-@File    : data_loader.py.py
+@File    : data_loader.py
 @Time    : 2021/3/9 16:55
 @Author  : y4ung
 @Desc    : 加载数据
@@ -248,7 +248,7 @@ class BatchLoader(object):
 
 
 if __name__ == '__main__':
-    # prepare_data("train")
-    batch_loader = BatchLoader(10, "prepared_data")
-    fea_data, label_data = next(batch_loader.iter_batch())
-    print(len(fea_data), "\n\n", label_data)
+    prepare_data("train")
+    # batch_loader = BatchLoader(10, "prepared_data")
+    # fea_data, label_data = next(batch_loader.iter_batch())
+    # print(len(fea_data), "\n\n", label_data)
