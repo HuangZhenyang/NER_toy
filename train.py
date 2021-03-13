@@ -68,6 +68,8 @@ def train(config, model, optimizer):
 
     for epoch in range(epoch_num):
         for fea_data, label_data in batch_loader.iter_batch():
+            if len(fea_data[0]) != config.batch_size:
+                continue
             fea_data, label_data = torch.tensor(fea_data), torch.tensor(label_data)
 
             model.zero_grad()  # PyTorch默认会累积梯度; 而我们需要每条样本单独算梯度，因此需要重置

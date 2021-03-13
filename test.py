@@ -53,5 +53,5 @@ if __name__ == '__main__':
 
     batch_loader = BatchLoader(10, "prepared_data")
     for a, b in batch_loader.iter_batch():
-        print(a, "\n", b)
+        print(len(a[0]))
 
