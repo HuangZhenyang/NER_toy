@@ -4,7 +4,7 @@
 @File    : model.py
 @Time    : 2021/3/9 20:18
 @Author  : y4ung
-@Desc    : 模型
+@Desc    : 模型定义部分
 """
 
 # NOTE: <START>和<STOP>只是为了增加CRF转移矩阵的鲁棒性，在源代码中并没有添加到句子中
@@ -25,18 +25,21 @@ STOP_TAG = '<STOP>'
 
 class Config(object):
     """
-    存储配置的类
+    保存配置的类
     """
-    batch_size = 10
-    hidden_dim = 128
-    # embeds_list dimension
-    embed = {
-        "word_embed_dim": 100,
-        "flag_embed_dim": 50,
-        "bound_embed_dim": 50,
-        "radical_embed_dim": 50,
-        "pinyin_embed_dim": 80,
-    }
+
+    def __init__(self, epoch=100, batch_size=10, hidden_dim=128, word_embed_dim=100, flag_embed_dim=50,
+                 bound_embed_dim=50, radical_embed_dim=50, pinyin_embed_dim=80):
+        self.epoch = epoch
+        self.batch_size = batch_size
+        self.hidden_dim = hidden_dim
+        self.embed = {
+            "word_embed_dim": word_embed_dim,
+            "flag_embed_dim": flag_embed_dim,
+            "bound_embed_dim": bound_embed_dim,
+            "radical_embed_dim": radical_embed_dim,
+            "pinyin_embed_dim": pinyin_embed_dim,
+        }
 
 
 config = Config()  # 配置类的实例化对象
@@ -221,7 +224,7 @@ class BiLSTMCRF(nn.Module):
             for j, word_emi_mat in enumerate(sentence_emi_mat):  # 对于单个字的Emission Score: [tagset_size]
                 real_path_score[i][0] += word_emi_mat[sentence_tags[j + 1]] + \
                                          self.transitions[
-                                             sentence_tags[j+1], sentence_tags[j]]  # 从j+1开始是因为j==0时是START
+                                             sentence_tags[j + 1], sentence_tags[j]]  # 从j+1开始是因为j==0时是START
 
             real_path_score[i][0] += self.transitions[self.tag_to_ix[STOP_TAG], sentence_tags[-1]]
 
@@ -387,9 +390,9 @@ if __name__ == '__main__':
         batch_loader = BatchLoader(config.batch_size, "prepared_data")
         fea_data, label_data = next(batch_loader.iter_batch())
         fea_data, label_data = torch.tensor(fea_data), torch.tensor(label_data)
-        label_data = label_data[0]  # 只取出[batch_size, seq_len] 的标签数据
         print(f"[i] Real Label Data: \n {label_data}")
         # model._embed_concat(fea_data)
         model.calc_loss(fea_data, label_data)
         batch_path_score, batch_best_path = model.forward(fea_data)
-        print(f"batch_path_score:\n{torch.tensor(batch_path_score)}\n\nbatch_best_path:\n{torch.tensor(batch_best_path)}")
+        print(
+            f"batch_path_score:\n{torch.tensor(batch_path_score)}\n\nbatch_best_path:\n{torch.tensor(batch_best_path)}")

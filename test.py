@@ -7,6 +7,8 @@
 @Desc    : 
 """
 import pickle
+
+from data_loader import BatchLoader
 from utils import load_sentences
 import torch
 import torch.nn as nn
@@ -49,5 +51,7 @@ if __name__ == '__main__':
             print(map_dict[each][1])
             print(len(map_dict[each][1]))
 
-
+    batch_loader = BatchLoader(10, "prepared_data")
+    for a, b in batch_loader.iter_batch():
+        print(a, "\n", b)
 

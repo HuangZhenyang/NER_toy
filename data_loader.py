@@ -244,6 +244,7 @@ class BatchLoader(object):
         for i in range(self.batch_data_list_len):
             one_batch_data = self.batch_data_list[i]
             fea_data, label_data = self.split_fea_label(one_batch_data, 1)
+            label_data = label_data[0]
             yield fea_data, label_data
 
 
