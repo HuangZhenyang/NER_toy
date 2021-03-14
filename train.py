@@ -88,7 +88,7 @@ def check_pred(config, model):
     batch_loader = BatchLoader(config.batch_size, "prepared_data")
     fea_data, label_data, init_sentence_len = next(batch_loader.iter_batch())
     fea_data, label_data, init_sentence_len = torch.tensor(fea_data).to(device), \
-                                              torch.tensor(label_data).to(device), \
+                                              torch.tensor(label_data).float().to(device), \
                                               torch.tensor(init_sentence_len).to(device)
 
     with torch.no_grad():
@@ -224,15 +224,12 @@ def train(config, model, optimizer):
                                                                                            sp_time))
 
         # 在验证集上测试
-        if (epoch + 1) % 5 == 0:
+        if (epoch + 1) % 1 == 0:  # TODO:测试通过以后，记得改成5
             valid_x.append(epoch)
             valid_loss, valid_acc = test(model)
             print("[i] 验证集. loss: {:.4f}, accuracy: {:.4f}%".format(valid_loss, valid_acc))
             valid_loss_list.append(valid_loss)
             valid_acc_list.append(valid_acc)
-
-    # 训练过程可视化
-    info_plot(epoch_num, train_loss_list, train_acc_list, valid_x, valid_loss_list, valid_acc_list)
 
     # 将训练好的模型保存到文件中
     print(f"[i] 保存模型到文件{model_save_path}中...")
