@@ -4,7 +4,7 @@
 @File    : data_loader.py
 @Time    : 2021/3/9 16:55
 @Author  : y4ung
-@Desc    : 加载数据
+@Desc    : 加载数据；根据utils.py处理后的特征csv文件和映射字典map_dict，构建特征为数值的数据集，并定义BatchLoader类提供batch数据
 """
 
 # import
@@ -50,7 +50,7 @@ def prepare_data(file_name="train") -> None:
     Returns:
         None
     """
-    print("[i] 准备数据，将提取的特征转换为数值下标，并进行数据增强")
+    print(f"[i] prepare_data: 准备{file_name}.csv的数据，将提取的特征转换为数值下标，并进行数据增强")
 
     # 读取特征映射字典
     with open("./data/map_dict.pkl", "rb") as f:
@@ -111,7 +111,7 @@ def prepare_data(file_name="train") -> None:
     prepared_data_list.extend(one_sen_fea_list + two_sen_fea_list + three_sen_fea_list)
 
     # 保存到文件中
-    save_file_path = os.path.join(data_root_dir, "prepared_data.pkl")
+    save_file_path = os.path.join(data_root_dir, f"prepared_{file_name}_data.pkl")
     print(f"[i] 保存数据到文件{save_file_path}中...")
     with open(save_file_path, "wb") as f:
         pickle.dump(prepared_data_list, f)
@@ -137,7 +137,7 @@ class BatchLoader(object):
         print(f"[i] 读取文件: {file_path}")
         with open(file_path, "rb") as f:
             self.data = pickle.load(f)
-        self.num_of_batch, self.batch_data_list = self.sort_and_pad()
+        self.num_of_batch, self.batch_data_list, self.init_sentence_len_list = self.sort_and_pad()
         self.batch_data_list_len = len(self.batch_data_list)
 
     def sort_and_pad(self) -> tuple:
@@ -147,18 +147,21 @@ class BatchLoader(object):
         Returns:
             num_of_batch: batch的数量
             batch_data_list: 每个batch数据的集合列表
+            init_sentence_len_list: 未padding之前的句子的长度，一维数组，每个值对应一个句子的原始长度
         """
         num_of_batch = int(math.ceil(len(self.data) / self.batch_size))  # batch的数量，一共有多少个batch
         sorted_data = sorted(self.data, key=lambda x: len(x[0]))  # 按照句子长度进行排序
         batch_data_list = []
+        init_sentence_len_list = []  # 未padding之前的句子的长度
 
         for i in range(num_of_batch):
             batch_data = sorted_data[
                          i * int(self.batch_size): (i + 1) * int(self.batch_size)]  # 按照batch_size从排序后的句子数据集中获取数据
-            padded_batch_data = self.pad_data(batch_data)  # 按照该batch中最长句子的长度进行padding操作
+            padded_batch_data, init_sentence_len = self.pad_data(batch_data)  # 按照该batch中最长句子的长度进行padding操作
             batch_data_list.append(padded_batch_data)
+            init_sentence_len_list.append(init_sentence_len)
 
-        return num_of_batch, batch_data_list
+        return num_of_batch, batch_data_list, init_sentence_len_list
 
     def get_num_of_batch(self):
         """
@@ -175,7 +178,7 @@ class BatchLoader(object):
         return self.num_of_batch, need_except
 
     @staticmethod
-    def pad_data(batch_data: list) -> list:
+    def pad_data(batch_data: list) -> tuple:
         """
         对每个bacth的数据进行填充，然后返回一个batch的数据list
 
@@ -191,6 +194,7 @@ class BatchLoader(object):
                                  ...,
                                  [ [填充后的句子1的pinyin向量], [填充后的句子2的pinyin向量], ...]
                                ]
+            init_sentence_len: 当前batch中各个句子的原始长度
         """
         word_list = []
         label_list = []
@@ -200,8 +204,11 @@ class BatchLoader(object):
         pinyin_list = []
         max_length = max([len(sentence[0]) for sentence in batch_data])  # 当前batch中最大的句子长度
 
+        init_sentence_len = []
+
         for sentence_fea_matrix in batch_data:  # 对于原始batch_data中每个句子的特征矩阵
             word, label, flag, bound, radical, pinyin = sentence_fea_matrix  # 分别获取每个句子的特征矩阵
+            init_sentence_len.append(len(word))
             padding_part = [0] * (max_length - len(word))  # 根据长度决定需要填充内容的长度
             # 对当前句子的不同特征向量进行padding，并添加到相应的特征矩阵中
             word_list.append(word + padding_part)
@@ -213,7 +220,7 @@ class BatchLoader(object):
 
         padded_batch_data = [word_list, label_list, flag_list, bound_list, radical_list, pinyin_list]
 
-        return padded_batch_data
+        return padded_batch_data, init_sentence_len
 
     def split_fea_label(self, one_batch_data, label_idx=1):
         """
@@ -259,13 +266,16 @@ class BatchLoader(object):
         for i in range(self.batch_data_list_len):
             one_batch_data = self.batch_data_list[i]
             fea_data, label_data = self.split_fea_label(one_batch_data, 1)
-            label_data = label_data[0]
-            yield fea_data, label_data
+            label_data = label_data[0]  # label_data本来是三维数组，这里去掉最外层的中括号
+            init_sentence_len = self.init_sentence_len_list[i]
+
+            yield fea_data, label_data, init_sentence_len
 
 
 if __name__ == '__main__':
-    # prepare_data("train")
-    batch_loader = BatchLoader(10, "prepared_data")
-    fea_data, label_data = next(batch_loader.iter_batch())
+    file_name = "test"
+    prepare_data(file_name)
+    batch_loader = BatchLoader(10, f"prepared_{file_name}_data")
+    fea_data, label_data, init_sentence_len = next(batch_loader.iter_batch())
     print(len(fea_data), "\n\n", label_data)
     print(batch_loader.get_num_of_batch())

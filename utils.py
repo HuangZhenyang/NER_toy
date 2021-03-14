@@ -4,7 +4,7 @@
 @File    : utils.py
 @Time    : 2021/3/8 17:13
 @Author  : y4ung
-@Desc    : 数据预处理
+@Desc    : 数据预处理；准备数据集处理后的特征csv文件，以及映射字典map_dict
 """
 
 # import
@@ -42,7 +42,7 @@ def load_sentences(file_path: str) -> tuple:
         all_sentence_list: 所有字级别的句子集合
         all_label_list： 所有字级别的标签集合
     """
-    print("[i] load_sentences：打开文件，加载句子")
+    print(f"[i] load_sentences：打开文件{file_path}，加载句子")
 
     all_sentence_list = []  # 保存所有句子中的词
     sentence_list = []  # 保存当前句子中的词
@@ -128,7 +128,7 @@ def replace_word(word: str) -> str:
     return word
 
 
-def extract_features(sentence_list, label_list, dataset_type="train", save_file_name="train") -> None:
+def extract_features(sentence_list, label_list, save_file_name="train") -> None:
     """
     处理单个数据集文件的文本：读取文本，打上标记，并提取词级别的特征，保存到csv文件中
 
@@ -307,8 +307,19 @@ def generate_dict(file_path: str, save_file_name: str) -> None:
 
 
 if __name__ == '__main__':
-    # train_sentence_list, train_label_list = load_sentences(train_file)
-    # train_id2label, train_label2id = label_encoder(train_label_list)  # 这个好像没什么用
-    # extract_features(train_sentence_list, train_label_list, "train")
+    # train
+    train_sentence_list, train_label_list = load_sentences(train_file)
+    train_id2label, train_label2id = label_encoder(train_label_list)  # 这个好像没什么用
+    extract_features(train_sentence_list, train_label_list, "train")
 
-    generate_dict("./data/train.csv", "map_dict")
+    # generate_dict("./data/train.csv", "map_dict")
+
+    # valid
+    valid_sentence_list, valid_label_list = load_sentences(valid_file)
+    valid_id2label, valid_label2id = label_encoder(valid_label_list)  # 这个好像没什么用
+    extract_features(valid_sentence_list, valid_label_list, "valid")
+
+    # test
+    test_sentence_list, test_label_list = load_sentences(test_file)
+    test_id2label, test_label2id = label_encoder(test_label_list)  # 这个好像没什么用
+    extract_features(test_sentence_list, test_label_list, "test")
