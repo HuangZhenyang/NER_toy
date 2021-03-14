@@ -11,7 +11,7 @@
 import datetime
 import torch
 import torch.optim as optim
-
+from tqdm import tqdm
 import argparse  # 命令行参数
 import time
 from model import *
@@ -19,7 +19,7 @@ from model import *
 # 全局变量
 # 解析参数
 parser = argparse.ArgumentParser(description="Pytorch NER Toy")
-parser.add_argument('--epoch', type=int, help='Number of epoch', default=100)
+parser.add_argument('--epoch', type=int, help='Number of epoch', default=10)
 parser.add_argument('--batch_size', type=int, help='Batch size', default=10)
 parser.add_argument('--hidden_dim', type=int, help='Hidden dimension of BiLSTM', default=128)
 parser.add_argument('--word_embed_dim', type=int, help='Word embedding dimension', default=100)
@@ -62,20 +62,41 @@ def train(config, model, optimizer):
         None
     """
     print(f"[i] 开始训练...")
-    st_time = datetime.datetime.now()
     epoch_num = config.epoch
     batch_loader = BatchLoader(config.batch_size, "prepared_data")
+    num_of_batch, need_except = batch_loader.get_num_of_batch()
+    if need_except:
+        num_of_batch -= 1
+    train_loss_list = []  # 保存每个epoch的loss
+    train_acc_list = []  # 保存每个epoch的准确率
 
     for epoch in range(epoch_num):
-        for fea_data, label_data in batch_loader.iter_batch():
-            if len(fea_data[0]) != config.batch_size:
-                continue
-            fea_data, label_data = torch.tensor(fea_data), torch.tensor(label_data)
+        print("=== Epoch {}/{} ===".format(epoch + 1, epoch_num))
+        st_time = datetime.datetime.now()
+        train_loss = 0.0
+        train_correct = 0.0  # 预测正确的句子数
+        total_sample_num = 0  # 已经处理过的句子数
 
-            model.zero_grad()  # PyTorch默认会累积梯度; 而我们需要每条样本单独算梯度，因此需要重置
+        # 将所有的batch喂给模型进行训练
+        for fea_data, label_data in tqdm(batch_loader.iter_batch(), total=num_of_batch):
+            if len(fea_data[0]) != config.batch_size:  # 对于最后一个不满足batch_size的batch，直接跳过
+                continue
+
+            fea_data, label_data = torch.tensor(fea_data), torch.tensor(label_data)
+            curr_batch_size = label_data.size(0)
+            total_sample_num += curr_batch_size
+
+            # PyTorch默认会累积梯度; 而我们需要每条样本单独算梯度，因此需要重置
+            model.zero_grad()
+
+            _, batch_best_path = model.forward(fea_data)
+
+            # 正确预测出的label的个数
+            train_correct += (label_data == batch_best_path).sum().item()
 
             # 计算loss
             loss = model.calc_loss(fea_data, label_data)
+            train_loss += loss.sum().item()
 
             # 反向传播
             loss.sum().backward()
@@ -83,8 +104,17 @@ def train(config, model, optimizer):
             # 更新参数
             optimizer.step()
 
-    ed_time = datetime.datetime.now()
-    print(f"[i] 训练时间: {(ed_time - st_time).seconds}s")
+        # loss
+        train_loss = train_loss / total_sample_num
+        train_loss_list.append(train_loss)
+        # 准确率
+        train_acc = train_correct / total_sample_num * 100
+        train_acc_list.append(train_acc)
+        # 花费时间
+        ed_time = datetime.datetime.now()
+        sp_time = ed_time - st_time
+
+        print("[i] loss: {:.4f}, training accuracy: {:.4f}%, spending time: {:.2f}".format(train_loss, train_acc, sp_time))
 
     # 将训练好的模型保存到文件中
     model_save_path = "./data/model.pkl"

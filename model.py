@@ -193,11 +193,11 @@ class BiLSTMCRF(nn.Module):
         """
         self.hidden = self._init_hidden()
         embeds = self._embed_concat(fea_data)
-        print(f"[i] 嵌入后的特征维度：{embeds.shape}")
+        # print(f"[i] 嵌入后的特征维度：{embeds.shape}")
         lstm_out, self.hidden = self.lstm(embeds, self.hidden)
-        print(f"[i] lstm_out的维度：{lstm_out.shape}")
+        # print(f"[i] lstm_out的维度：{lstm_out.shape}")
         lstm_feats = self.hidden2tag(lstm_out)
-        print(f"[i] BiLSTM输出的lstm_feats维度：{lstm_feats.shape}")
+        # print(f"[i] BiLSTM输出的lstm_feats维度：{lstm_feats.shape}")
 
         return lstm_feats
 
@@ -228,7 +228,7 @@ class BiLSTMCRF(nn.Module):
 
             real_path_score[i][0] += self.transitions[self.tag_to_ix[STOP_TAG], sentence_tags[-1]]
 
-        print(f"[i] P_{{realpath}} = \n\t{real_path_score}")
+        # print(f"[i] P_{{realpath}} = \n\t{real_path_score}")
 
         return real_path_score
 
@@ -268,7 +268,7 @@ class BiLSTMCRF(nn.Module):
             sentence_all_path_score = log_sum_exp(terminal_var)
             all_path_score[i] = sentence_all_path_score
 
-        print(f"[i] P_{{1}}+...+P_{{N}} = \n\t{all_path_score}")
+        # print(f"[i] P_{{1}}+...+P_{{N}} = \n\t{all_path_score}")
 
         return all_path_score
 
@@ -304,7 +304,7 @@ class BiLSTMCRF(nn.Module):
 
         loss = all_path_score - real_path_score  # -log(正确/所有) = -(log(正确)-log(所有)) = log(所有) - log(正确)
 
-        print(f"[i] loss is \n\t{loss}")
+        # print(f"[i] loss is \n\t{loss}")
 
         return loss
 
@@ -361,6 +361,8 @@ class BiLSTMCRF(nn.Module):
             batch_path_score.append(path_score)
             batch_best_path.append(best_path)
 
+        batch_path_score, batch_best_path = torch.tensor(batch_path_score), torch.tensor(batch_best_path)
+
         return batch_path_score, batch_best_path
 
     def forward(self, sentence):
@@ -378,6 +380,7 @@ class BiLSTMCRF(nn.Module):
 
         # Find the best path, given the features.
         score, tag_seq = self._viterbi_decode(lstm_feats)
+
         return score, tag_seq
 
 

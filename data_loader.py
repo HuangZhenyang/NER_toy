@@ -137,14 +137,15 @@ class BatchLoader(object):
         print(f"[i] 读取文件: {file_path}")
         with open(file_path, "rb") as f:
             self.data = pickle.load(f)
-        self.batch_data_list = self.sort_and_pad()
+        self.num_of_batch, self.batch_data_list = self.sort_and_pad()
         self.batch_data_list_len = len(self.batch_data_list)
 
-    def sort_and_pad(self) -> list:
+    def sort_and_pad(self) -> tuple:
         """
         按照句子的长度进行排序，使得长度相近的句子排在一起，避免太长和太短的句子放到一个batch，导致短句padding得太多
 
         Returns:
+            num_of_batch: batch的数量
             batch_data_list: 每个batch数据的集合列表
         """
         num_of_batch = int(math.ceil(len(self.data) / self.batch_size))  # batch的数量，一共有多少个batch
@@ -157,7 +158,21 @@ class BatchLoader(object):
             padded_batch_data = self.pad_data(batch_data)  # 按照该batch中最长句子的长度进行padding操作
             batch_data_list.append(padded_batch_data)
 
-        return batch_data_list
+        return num_of_batch, batch_data_list
+
+    def get_num_of_batch(self):
+        """
+        获取数据集处理后的batch的数量
+
+        Returns:
+            self.num_of_batch: batch的数量
+            need_except: 是否需要排除最后一个batch(样本数不满足batch_size)
+        """
+        if len(self.batch_data_list[-1][0]) != self.batch_size:
+            need_except = True
+        else:
+            need_except = False
+        return self.num_of_batch, need_except
 
     @staticmethod
     def pad_data(batch_data: list) -> list:
@@ -249,7 +264,8 @@ class BatchLoader(object):
 
 
 if __name__ == '__main__':
-    prepare_data("train")
-    # batch_loader = BatchLoader(10, "prepared_data")
-    # fea_data, label_data = next(batch_loader.iter_batch())
-    # print(len(fea_data), "\n\n", label_data)
+    # prepare_data("train")
+    batch_loader = BatchLoader(10, "prepared_data")
+    fea_data, label_data = next(batch_loader.iter_batch())
+    print(len(fea_data), "\n\n", label_data)
+    print(batch_loader.get_num_of_batch())
