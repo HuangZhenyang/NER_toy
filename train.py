@@ -18,6 +18,8 @@ from model import *
 import matplotlib.pyplot as plt
 
 # 全局变量
+model_save_path = "./data/model.pkl"
+process_data_save_path = "./data/train_process_data.pkl"
 # 解析参数
 parser = argparse.ArgumentParser(description="Pytorch NER Toy")
 parser.add_argument('--epoch', type=int, help='Number of epoch', default=10)
@@ -82,8 +84,10 @@ def check_pred(config, model):
     """
     print("[i] check_pred: 训练之前测试模型的预测功能")
     batch_loader = BatchLoader(config.batch_size, "prepared_data")
-    fea_data, label_data = next(batch_loader.iter_batch())
-    fea_data, label_data = torch.tensor(fea_data), torch.tensor(label_data)
+    fea_data, label_data, init_sentence_len = next(batch_loader.iter_batch())
+    fea_data, label_data, init_sentence_len = torch.tensor(fea_data), \
+                                              torch.tensor(label_data), \
+                                              torch.tensor(init_sentence_len)
     with torch.no_grad():
         print(model(fea_data))
 
@@ -113,7 +117,8 @@ def test(model, test_type="valid"):
             if len(fea_data[0]) != config.batch_size:  # 对于最后一个不满足batch_size的batch，直接跳过
                 continue
 
-            fea_data, label_data, init_sentence_len = torch.tensor(fea_data), torch.tensor(label_data), \
+            fea_data, label_data, init_sentence_len = torch.tensor(fea_data), \
+                                                      torch.tensor(label_data), \
                                                       torch.tensor(init_sentence_len)
             total_word_num += init_sentence_len.sum().item()
 
@@ -175,7 +180,8 @@ def train(config, model, optimizer):
             if len(fea_data[0]) != config.batch_size:  # 对于最后一个不满足batch_size的batch，直接跳过
                 continue
 
-            fea_data, label_data, init_sentence_len = torch.tensor(fea_data), torch.tensor(label_data), \
+            fea_data, label_data, init_sentence_len = torch.tensor(fea_data), \
+                                                      torch.tensor(label_data), \
                                                       torch.tensor(init_sentence_len)
             total_word_num += init_sentence_len.sum().item()
 
@@ -215,17 +221,14 @@ def train(config, model, optimizer):
                                                                                            sp_time))
 
         # 在验证集上测试
-        if (epoch + 1) % 5 == 0:
+        if (epoch + 1) % 1 == 0:  # TODO:测试通过以后，记得改成5
             valid_x.append(epoch)
             valid_loss, valid_acc = test(model)
+            print("[i] 验证集. loss: {:.4f}, accuracy: {:.4f}%".format(valid_loss, valid_acc))
             valid_loss_list.append(valid_loss)
             valid_acc_list.append(valid_acc)
 
-    # 训练过程可视化
-    info_plot(epoch_num, train_loss_list, train_acc_list, valid_x, valid_loss_list, valid_acc_list)
-
     # 将训练好的模型保存到文件中
-    model_save_path = "./data/model.pkl"
     print(f"[i] 保存模型到文件{model_save_path}中...")
     with open(model_save_path, "wb") as f:
         pickle.dump(model, f)
@@ -240,7 +243,6 @@ def train(config, model, optimizer):
         "valid_loss_list": valid_loss_list,
         "valid_acc_list": valid_acc_list
     }
-    process_data_save_path = "./data/train_process_data.pkl"
     print(f"[i] 保存训练过程数据到文件{process_data_save_path}中...")
     with open(process_data_save_path, "wb") as f:
         pickle.dump(train_process_data, f)
@@ -260,7 +262,19 @@ if __name__ == '__main__':
     optimizer = optim.SGD(model.parameters(), lr=0.001, weight_decay=1e-4)
 
     # 测试模型的预测功能
-    # check_pred(config, model)
+    check_pred(config, model)
 
     # 训练
     train(config, model, optimizer)
+
+    # 训练过程可视化
+    with open(process_data_save_path, "rb") as f:
+        train_process_data = pickle.load(f)
+    epoch_num = train_process_data["epoch_num"]
+    train_loss_list = train_process_data["train_loss_list"]
+    train_acc_list = train_process_data["train_acc_list"]
+    valid_x = train_process_data["valid_x"]
+    valid_loss_list = train_process_data["valid_loss_list"]
+    valid_acc_list = train_process_data["valid_acc_list"]
+
+    info_plot(epoch_num, train_loss_list, train_acc_list, valid_x, valid_loss_list, valid_acc_list)
