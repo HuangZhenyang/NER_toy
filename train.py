@@ -112,7 +112,7 @@ def test(model, test_type="valid"):
     num_of_batch, need_except = batch_loader.get_num_of_batch()
 
     with torch.no_grad():
-        loss = 0.0
+        test_loss = 0.0
         correct = 0
         total_word_num = 0
 
@@ -131,19 +131,19 @@ def test(model, test_type="valid"):
             for i in range(len(label_data)):  # 对于每一句话的label
                 sentence_len = init_sentence_len[i]
                 tmp_label_data = label_data[i][:sentence_len]
-                tmp_batch_best_path = batch_best_path[i][:sentence_len]
+                tmp_batch_best_path = batch_best_path[i][:sentence_len].to(device)
                 correct += (tmp_label_data == tmp_batch_best_path).sum().item()
 
             # 计算loss
             loss = model.calc_loss(fea_data, label_data)
-            loss += loss.mean().item()
+            test_loss += loss.mean().item()
 
         # loss
-        loss = loss / num_of_batch
+        test_loss = test_loss / num_of_batch
         # 准确率
         acc = correct / total_word_num * 100
 
-        return loss, acc
+        return test_loss, acc
 
 
 def train(config, model, optimizer):
@@ -224,7 +224,7 @@ def train(config, model, optimizer):
                                                                                            sp_time))
 
         # 在验证集上测试
-        if (epoch + 1) % 1 == 0:  # TODO:测试通过以后，记得改成5
+        if (epoch + 1) % 5 == 0:  # TODO:测试通过以后，记得改成5
             valid_x.append(epoch)
             valid_loss, valid_acc = test(model)
             print("[i] 验证集. loss: {:.4f}, accuracy: {:.4f}%".format(valid_loss, valid_acc))
