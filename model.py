@@ -15,6 +15,7 @@ import torch
 import torch.nn as nn
 import pickle
 from data_loader import *
+from train import device
 
 torch.manual_seed(1)
 
@@ -124,21 +125,21 @@ class BiLSTMCRF(nn.Module):
         # === BiLSTM ===
         # 为不同的特征创建Embedding层
         self.embed_dict = {
-            fea: nn.Embedding(self.vocab_size_dict[fea], embed_config[fea + "_embed_dim"]) if fea != "label" else None
+            fea: nn.Embedding(self.vocab_size_dict[fea], embed_config[fea + "_embed_dim"]).to(device) if fea != "label" else None
             for fea in map_dict.keys()
         }
         self.lstm = nn.LSTM(self.embedding_dim, self.hidden_dim // 2, num_layers=1, batch_first=True,
-                            bidirectional=True)
+                            bidirectional=True).to(device)
         self.hidden = self._init_hidden()  # 初始化隐藏层
 
         # 全连接层，将LSTM的输出映射到标签的向量空间
-        self.hidden2tag = nn.Linear(self.hidden_dim, self.tagset_size)
+        self.hidden2tag = nn.Linear(self.hidden_dim, self.tagset_size).to(device)
 
         # === CRF ===
         # 转移矩阵的参数。[i][j] 是从i转移到j的得分
         # 学习标签之间的约束条件，i->j就是从i标签转移到j标签的得分
         self.transitions = nn.Parameter(
-            torch.randn(self.tagset_size, self.tagset_size))
+            torch.randn(self.tagset_size, self.tagset_size)).to(device)
         self.transitions.data[self.tag_to_ix[START_TAG], :] = -10000  # START_TAG这一行全为-10000
         self.transitions.data[:, self.tag_to_ix[STOP_TAG]] = -10000  # STOP_TAG这一列全为-10000
 
@@ -171,8 +172,8 @@ class BiLSTMCRF(nn.Module):
         Returns:
             tuple: 隐藏层参数，tuple中每个元素都是 [2,1,self.hidden_dim // 2]
         """
-        return (torch.randn(2, self.batch_size, self.hidden_dim // 2),
-                torch.randn(2, self.batch_size, self.hidden_dim // 2))
+        return (torch.randn(2, self.batch_size, self.hidden_dim // 2).to(device),
+                torch.randn(2, self.batch_size, self.hidden_dim // 2).to(device))
 
     def _get_lstm_features(self, fea_data):
         """
@@ -191,6 +192,7 @@ class BiLSTMCRF(nn.Module):
         Returns:
             lstm_feats: 发射得分矩阵，[batch_size, seq_len, tagset_size]。最里面每一个向量表示该字的label预测情况
         """
+        fea_data = fea_data.to(device)
         self.hidden = self._init_hidden()
         embeds = self._embed_concat(fea_data)
         # print(f"[i] 嵌入后的特征维度：{embeds.shape}")
@@ -214,13 +216,13 @@ class BiLSTMCRF(nn.Module):
         Returns:
             real_path_score: batch_size个句子的真实路径得分. [batch_size, 1]
         """
-        real_path_score = torch.zeros((self.batch_size, 1))  # batch_size个句子的真实路径得分
+        real_path_score = torch.zeros((self.batch_size, 1)).to(device)  # batch_size个句子的真实路径得分
         # 创建[self.batch_size, 1]的START_TAG下标的tensor
-        st_tag_tensor = torch.full([self.batch_size, 1], self.tag_to_ix[START_TAG])
-        tags = torch.cat([st_tag_tensor, tags], -1)  # 将st_tag_tensor添加到tags中，所以每个句子的tag seq会多一个值
+        st_tag_tensor = torch.full([self.batch_size, 1], self.tag_to_ix[START_TAG]).to(device)
+        tags = torch.cat([st_tag_tensor, tags], -1).to(device)  # 将st_tag_tensor添加到tags中，所以每个句子的tag seq会多一个值
 
         for i, sentence_emi_mat in enumerate(emission_matrix):  # 对于每个句子的Emission Score: [seq_len, tagset_size]
-            sentence_tags = tags[i]  # 当前句子的label index序列
+            sentence_tags = tags[i].long()  # 当前句子的label index序列
             for j, word_emi_mat in enumerate(sentence_emi_mat):  # 对于单个字的Emission Score: [tagset_size]
                 real_path_score[i][0] += word_emi_mat[sentence_tags[j + 1]] + \
                                          self.transitions[
@@ -243,7 +245,7 @@ class BiLSTMCRF(nn.Module):
             all_path_score: 每个句子所有路径的得分. [batch_size, 1]
         """
         init_alphas = torch.full((self.batch_size, 1, self.tagset_size),
-                                 -10000.)  # 初始化一个[1, self.target_size]的二维矩阵，每一维的内容都是-10000
+                                 -10000.).to(device)  # 初始化一个[1, self.target_size]的二维矩阵，每一维的内容都是-10000
         for i in range(self.batch_size):
             init_alphas[i][0][self.tag_to_ix[START_TAG]] = 0.
 
@@ -258,9 +260,9 @@ class BiLSTMCRF(nn.Module):
                 for next_tag in range(self.tagset_size):  # 遍历每个tag
                     # 发射得分
                     # 先将发射得分变成[1,1]，再拓展成[1, tagset_size]
-                    emit_score = word_emi_mat[next_tag].view(1, -1).expand(1, self.tagset_size)
+                    emit_score = word_emi_mat[next_tag].view(1, -1).expand(1, self.tagset_size).to(device)
                     # 转移得分, [tagset_size] -> [1, tagset_size]
-                    trans_score = self.transitions[next_tag].view(1, -1)
+                    trans_score = self.transitions[next_tag].view(1, -1).to(device)
                     next_tag_var = forward_var[i] + trans_score + emit_score  # [1, tagset_size]
                     alphas_t.append(log_sum_exp(next_tag_var).view(1))  # 添加[1]
                 forward_var[i] = torch.cat(alphas_t).view(1, -1)
@@ -298,9 +300,9 @@ class BiLSTMCRF(nn.Module):
         Returns:
             loss: [batch_size, 1]
         """
-        feats = self._get_lstm_features(fea_data)  # 得到BiLSTM输出的发射得分矩阵
-        real_path_score = self._calc_real_path_score(feats, tags)  # 正确路径的分数
-        all_path_score = self._calc_all_path_score(feats)  # 所有路径的分数和
+        feats = self._get_lstm_features(fea_data).to(device)  # 得到BiLSTM输出的发射得分矩阵
+        real_path_score = self._calc_real_path_score(feats, tags).to(device)  # 正确路径的分数
+        all_path_score = self._calc_all_path_score(feats).to(device)  # 所有路径的分数和
 
         loss = all_path_score - real_path_score  # -log(正确/所有) = -(log(正确)-log(所有)) = log(所有) - log(正确)
 
@@ -321,7 +323,7 @@ class BiLSTMCRF(nn.Module):
         batch_path_score = []
         batch_best_path = []
 
-        init_vvars = torch.full((self.batch_size, 1, self.tagset_size), -10000.)
+        init_vvars = torch.full((self.batch_size, 1, self.tagset_size), -10000.).to(device)
         for i in range(self.batch_size):
             init_vvars[i][0][self.tag_to_ix[START_TAG]] = 0
 
@@ -365,18 +367,20 @@ class BiLSTMCRF(nn.Module):
 
         return batch_path_score, batch_best_path
 
-    def forward(self, sentence):
+    def forward(self, fea_data):
         """
         模型inference逻辑
 
         Args:
-            sentence:
+            fea_data:
 
         Returns:
 
         """
+        fea_data = fea_data.to(device)
+
         # Get the emission scores from the BiLSTM
-        lstm_feats = self._get_lstm_features(sentence)
+        lstm_feats = self._get_lstm_features(fea_data)
 
         # Find the best path, given the features.
         score, tag_seq = self._viterbi_decode(lstm_feats)
