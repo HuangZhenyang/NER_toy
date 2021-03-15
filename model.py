@@ -15,11 +15,12 @@ import torch
 import torch.nn as nn
 import pickle
 from data_loader import *
-from train import device
 
 torch.manual_seed(1)
 
 # 全局变量
+use_gpu = torch.cuda.is_available()
+device = torch.device("cuda:0") if use_gpu else torch.device("cpu")
 START_TAG = '<START>'
 STOP_TAG = '<STOP>'
 

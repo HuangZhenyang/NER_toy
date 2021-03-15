@@ -12,8 +12,6 @@ import pickle
 from data_loader import BatchLoader
 from train import test, model_save_path, device, config
 
-
-
 # 全局变量
 with open(model_save_path, "rb") as f:
     model = pickle.load(f)
@@ -64,7 +62,7 @@ def infer(model):
     # 打印预测和真实的差距
     print("word\tpred_label\treal_label")
     for i in range(config.batch_size):  # 对于每个句子
-        print(f"[i] === 句子[{i+1}] ===")
+        print(f"[i] === 句子[{i + 1}] ===")
         sentence_word = word_idx_data[i]
         pred_path = batch_pred_path[i]
         real_label = label_data[i]
@@ -84,7 +82,3 @@ def infer(model):
 if __name__ == '__main__':
     test_on_test_ds(model)
     infer(model)
-
-
-
-

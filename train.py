@@ -14,7 +14,8 @@ import torch.optim as optim
 from tqdm import tqdm
 import argparse  # 命令行参数
 import time
-from model import *
+import pickle
+from model import Config, BatchLoader, BiLSTMCRF
 import matplotlib.pyplot as plt
 
 # 全局变量
@@ -173,6 +174,7 @@ def train(config, model, optimizer):
     valid_x = []  # 验证集的epoch下标
     valid_loss_list = []  # 验证集上的loss集合
     valid_acc_list = []  # 验证集上的准确率集合
+    valid_best_acc = -999  # 验证集上效果最好的准确率
 
     for epoch in range(epoch_num):
         print("=== Epoch {}/{} ===".format(epoch + 1, epoch_num))
@@ -231,14 +233,17 @@ def train(config, model, optimizer):
             valid_x.append(epoch)
             valid_loss, valid_acc = test(model)
             print("[i] 验证集. loss: {:.4f}, accuracy: {:.4f}%".format(valid_loss, valid_acc))
+
+            # 保存在验证集上效果最好的模型
+            if valid_acc > valid_best_acc:
+                valid_best_acc = valid_acc
+                # 将训练好的模型保存到文件中
+                print(f"[i] 保存模型到文件{model_save_path}中...")
+                with open(model_save_path, "wb") as f:
+                    pickle.dump(model, f)
+                print(f"[i] 保存完毕")
             valid_loss_list.append(valid_loss)
             valid_acc_list.append(valid_acc)
-
-    # 将训练好的模型保存到文件中
-    print(f"[i] 保存模型到文件{model_save_path}中...")
-    with open(model_save_path, "wb") as f:
-        pickle.dump(model, f)
-    print(f"[i] 保存完毕")
 
     # 将训练过程中的数据保存到文件中，方便可视化
     train_process_data = {
