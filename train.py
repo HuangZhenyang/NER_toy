@@ -34,6 +34,9 @@ parser.add_argument('--radical_embed_dim', type=int, help='Radical embedding dim
 parser.add_argument('--pinyin_embed_dim', type=int, help='Pinyin embedding dimension', default=80)
 args = parser.parse_args()
 
+config = Config(args.epoch, args.batch_size, args.hidden_dim, args.word_embed_dim, args.flag_embed_dim,
+                    args.bound_embed_dim, args.radical_embed_dim, args.pinyin_embed_dim)
+
 
 def info_plot(epoch_num, train_loss_list, train_acc_list, valid_x, valid_loss_list, valid_acc_list):
     """
@@ -116,7 +119,7 @@ def test(model, test_type="valid"):
         correct = 0
         total_word_num = 0
 
-        for fea_data, label_data, init_sentence_len in tqdm(batch_loader.iter_batch(), total=num_of_batch):
+        for fea_data, label_data, init_sentence_len in tqdm(batch_loader.iter_batch(shuffle=True), total=num_of_batch):
             if len(fea_data[0]) != config.batch_size:  # 对于最后一个不满足batch_size的batch，直接跳过
                 continue
 
@@ -179,7 +182,7 @@ def train(config, model, optimizer):
         total_word_num = 0  # 已经处理过的word数
 
         # 将所有的batch喂给模型进行训练
-        for fea_data, label_data, init_sentence_len in tqdm(batch_loader.iter_batch(), ascii=True, total=num_of_batch):
+        for fea_data, label_data, init_sentence_len in tqdm(batch_loader.iter_batch(shuffle=True), ascii=True, total=num_of_batch):
             if len(fea_data[0]) != config.batch_size:  # 对于最后一个不满足batch_size的batch，直接跳过
                 continue
 
@@ -256,9 +259,6 @@ if __name__ == '__main__':
     # 创建模型的实例对象
     with open("./data/map_dict.pkl", "rb") as f:
         map_dict = pickle.load(f)
-
-    config = Config(args.epoch, args.batch_size, args.hidden_dim, args.word_embed_dim, args.flag_embed_dim,
-                    args.bound_embed_dim, args.radical_embed_dim, args.pinyin_embed_dim)
 
     model = BiLSTMCRF(map_dict, config)
     model = model.to(device)

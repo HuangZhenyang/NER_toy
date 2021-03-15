@@ -259,6 +259,9 @@ class BatchLoader(object):
                 [
                     [ [填充后的句子1的label向量], [填充后的句子2的label向量], ...]
                 ]
+
+            init_sentence_len: 未padding之前的句子的长度
+                [ 每个值代表该句子的原始长度 ]
         """
         if shuffle:
             random.shuffle(self.batch_data_list)
@@ -274,8 +277,9 @@ class BatchLoader(object):
 
 if __name__ == '__main__':
     file_name = "test"
-    prepare_data(file_name)
+    # prepare_data(file_name)
     batch_loader = BatchLoader(10, f"prepared_{file_name}_data")
     fea_data, label_data, init_sentence_len = next(batch_loader.iter_batch())
     print(len(fea_data), "\n\n", label_data)
     print(batch_loader.get_num_of_batch())
+    print(init_sentence_len)
