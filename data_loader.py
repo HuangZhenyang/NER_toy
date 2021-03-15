@@ -266,7 +266,9 @@ class BatchLoader(object):
                 [ 每个值代表该句子的原始长度 ]
         """
         if shuffle:
+            random.seed(random_seed)
             random.shuffle(self.batch_data_list)
+            random.seed(random_seed)
             random.shuffle(self.init_sentence_len_list)
 
         for i in range(self.batch_data_list_len):
