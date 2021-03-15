@@ -19,6 +19,8 @@ import random
 
 
 # 全局变量
+random_seed = 314
+random.seed(random_seed)
 
 
 def prepare_sequence(seq: list, item2id: dict) -> list:
@@ -265,6 +267,7 @@ class BatchLoader(object):
         """
         if shuffle:
             random.shuffle(self.batch_data_list)
+            random.shuffle(self.init_sentence_len_list)
 
         for i in range(self.batch_data_list_len):
             one_batch_data = self.batch_data_list[i]
