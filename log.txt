@@ -1,0 +1,75 @@
+D:\ProgramData\Anaconda3\envs\nlp\python.exe E:/Research/NLP/NER/NER_toy/train.py
+[i] check_pred: 训练之前测试模型的预测功能
+[i] 读取文件: ./data/prepared_data.pkl
+(tensor([15.7534, 15.9218, 16.1861, 15.4076, 16.1066, 16.2946, 15.9021, 15.9107,
+        15.6533, 16.0710]), tensor([[2, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+        [2, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+        [5, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+        [5, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+        [2, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+        [5, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+        [2, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+        [2, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+        [2, 1, 0, 1, 0, 1, 0, 1, 0, 2],
+        [5, 1, 0, 1, 0, 1, 0, 1, 0, 2]]))
+[i] 开始训练...
+[i] 读取文件: ./data/prepared_data.pkl
+  0%|          | 0/2342 [00:00<?, ?it/s]=== Epoch 1/10 ===
+2343it [2:16:01,  3.48s/it]
+  0%|          | 0/2342 [00:00<?, ?it/s][i] loss: 22.8618, training accuracy: 90.8247%, spending time: 8161.53
+=== Epoch 2/10 ===
+2343it [2:17:49,  3.53s/it]
+[i] loss: 9.9311, training accuracy: 93.3651%, spending time: 8269.52
+[i] 读取文件: ./data/prepared_valid_data.pkl
+100%|██████████| 2343/2343 [53:39<00:00,  1.37s/it]
+[i] 验证集. loss: 8.0097, accuracy: 94.4798%
+[i] 保存模型到文件./data/model.pkl中...
+  0%|          | 0/2342 [00:00<?, ?it/s][i] 保存完毕
+=== Epoch 3/10 ===
+2343it [2:16:25,  3.49s/it]
+  0%|          | 0/2342 [00:00<?, ?it/s][i] loss: 7.1453, training accuracy: 94.8685%, spending time: 8185.54
+=== Epoch 4/10 ===
+2343it [2:14:54,  3.45s/it]
+[i] loss: 5.6573, training accuracy: 95.8767%, spending time: 8094.11
+[i] 读取文件: ./data/prepared_valid_data.pkl
+100%|██████████| 2343/2343 [50:13<00:00,  1.29s/it]
+[i] 验证集. loss: 4.9541, accuracy: 96.4786%
+[i] 保存模型到文件./data/model.pkl中...
+[i] 保存完毕
+=== Epoch 5/10 ===
+2343it [2:12:49,  3.40s/it]
+  0%|          | 0/2342 [00:00<?, ?it/s][i] loss: 4.7317, training accuracy: 96.5267%, spending time: 7969.45
+=== Epoch 6/10 ===
+2343it [2:12:50,  3.40s/it]
+[i] loss: 4.0519, training accuracy: 97.1094%, spending time: 7970.08
+[i] 读取文件: ./data/prepared_valid_data.pkl
+100%|██████████| 2343/2343 [49:59<00:00,  1.28s/it]
+[i] 验证集. loss: 3.7057, accuracy: 97.4017%
+[i] 保存模型到文件./data/model.pkl中...
+[i] 保存完毕
+=== Epoch 7/10 ===
+2343it [2:13:50,  3.43s/it]
+  0%|          | 0/2342 [00:00<?, ?it/s][i] loss: 3.5125, training accuracy: 97.5336%, spending time: 8030.75
+=== Epoch 8/10 ===
+2343it [2:17:51,  3.53s/it]
+[i] loss: 3.1047, training accuracy: 97.8963%, spending time: 8271.63
+[i] 读取文件: ./data/prepared_valid_data.pkl
+100%|██████████| 2343/2343 [51:49<00:00,  1.33s/it]
+[i] 验证集. loss: 2.8928, accuracy: 97.9297%
+[i] 保存模型到文件./data/model.pkl中...
+[i] 保存完毕
+=== Epoch 9/10 ===
+2343it [2:17:17,  3.52s/it]
+  0%|          | 0/2342 [00:00<?, ?it/s][i] loss: 2.7531, training accuracy: 98.1726%, spending time: 8237.49
+=== Epoch 10/10 ===
+2343it [2:17:49,  3.53s/it]
+[i] loss: 2.4758, training accuracy: 98.4229%, spending time: 8269.77
+[i] 读取文件: ./data/prepared_valid_data.pkl
+100%|██████████| 2343/2343 [50:35<00:00,  1.30s/it]
+[i] 验证集. loss: 2.2064, accuracy: 98.6693%
+[i] 保存模型到文件./data/model.pkl中...
+[i] 保存完毕
+[i] 保存训练过程数据到文件./data/train_process_data.pkl中...
+[i] 保存完毕
+
+Process finished with exit code 0

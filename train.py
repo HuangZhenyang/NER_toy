@@ -61,8 +61,8 @@ def info_plot(epoch_num, train_loss_list, train_acc_list, valid_x, valid_loss_li
     plt.ylabel("loss")
 
     # accuracy
-    plt.plot(train_x, train_acc_list, "-", color="orange", label="training accuracy")
-    plt.plot(valid_x, valid_acc_list, ".-", color="blue", label="validating accuracy")
+    plt.plot(train_x, train_acc_list, "-", color="red", label="training accuracy")
+    plt.plot(valid_x, valid_acc_list, ".-", color="green", label="validating accuracy")
     plt.legend()
     plt.title("accuracy vs. epoch")
     plt.xlabel("epoch")
@@ -254,22 +254,22 @@ def train(config, model, optimizer):
 
 
 if __name__ == '__main__':
-    # 创建模型的实例对象
-    with open("./data/map_dict.pkl", "rb") as f:
-        map_dict = pickle.load(f)
-
-    config = Config(args.epoch, args.batch_size, args.hidden_dim, args.word_embed_dim, args.flag_embed_dim,
-                    args.bound_embed_dim, args.radical_embed_dim, args.pinyin_embed_dim)
-
-    model = BiLSTMCRF(map_dict, config)
-
-    optimizer = optim.SGD(model.parameters(), lr=0.001, weight_decay=1e-4)
-
-    # 测试模型的预测功能
-    check_pred(config, model)
-
-    # 训练
-    train(config, model, optimizer)
+    # # 创建模型的实例对象
+    # with open("./data/map_dict.pkl", "rb") as f:
+    #     map_dict = pickle.load(f)
+    #
+    # config = Config(args.epoch, args.batch_size, args.hidden_dim, args.word_embed_dim, args.flag_embed_dim,
+    #                 args.bound_embed_dim, args.radical_embed_dim, args.pinyin_embed_dim)
+    #
+    # model = BiLSTMCRF(map_dict, config)
+    #
+    # optimizer = optim.SGD(model.parameters(), lr=0.001, weight_decay=1e-4)
+    #
+    # # 测试模型的预测功能
+    # check_pred(config, model)
+    #
+    # # 训练
+    # train(config, model, optimizer)
 
     # 训练过程可视化
     with open(process_data_save_path, "rb") as f:
