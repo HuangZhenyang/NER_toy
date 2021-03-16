@@ -19,6 +19,8 @@ from model import Config, BatchLoader, BiLSTMCRF
 import matplotlib.pyplot as plt
 
 # 全局变量
+torch.cuda.manual_seed(1)  # 为GPU设置随机种子
+torch.backends.cudnn.deterministic = True
 use_gpu = torch.cuda.is_available()
 device = torch.device("cuda:0") if use_gpu else torch.device("cpu")
 model_save_path = "./data/model.pkl"
@@ -26,7 +28,7 @@ process_data_save_path = "./data/train_process_data.pkl"
 # 解析参数
 parser = argparse.ArgumentParser(description="Pytorch NER Toy")
 parser.add_argument('--epoch', type=int, help='Number of epoch', default=10)
-parser.add_argument('--batch_size', type=int, help='Batch size', default=10)
+parser.add_argument('--batch_size', type=int, help='Batch size', default=8)
 parser.add_argument('--hidden_dim', type=int, help='Hidden dimension of BiLSTM', default=128)
 parser.add_argument('--word_embed_dim', type=int, help='Word embedding dimension', default=100)
 parser.add_argument('--flag_embed_dim', type=int, help='Flag embedding dimension', default=50)
@@ -67,8 +69,8 @@ def info_plot(epoch_num, train_loss_list, train_acc_list, valid_x, valid_loss_li
     plt.ylabel("loss")
 
     # accuracy
-    plt.plot(train_x, train_acc_list, "-", color="orange", label="training accuracy")
-    plt.plot(valid_x, valid_acc_list, ".-", color="blue", label="validating accuracy")
+    plt.plot(train_x, train_acc_list, "-", color="red", label="training accuracy")
+    plt.plot(valid_x, valid_acc_list, ".-", color="green", label="validating accuracy")
     plt.legend()
     plt.title("accuracy vs. epoch")
     plt.xlabel("epoch")
@@ -77,19 +79,20 @@ def info_plot(epoch_num, train_loss_list, train_acc_list, valid_x, valid_loss_li
     plt.show()
 
 
-def check_pred(config, model):
+def check_pred(config, model, file_name):
     """
     在训练之前测试一下模型的预测功能
 
     Args:
         config: 配置类的实例对象
         model: 模型的实例对象
+        file_name: 准备好的数据集文件名
 
     Returns:
         None
     """
     print("[i] check_pred: 训练之前测试模型的预测功能")
-    batch_loader = BatchLoader(config.batch_size, "prepared_data")
+    batch_loader = BatchLoader(config.batch_size, f"prepared_{file_name}_data")
     fea_data, label_data, init_sentence_len = next(batch_loader.iter_batch())
     fea_data, label_data, init_sentence_len = torch.tensor(fea_data).to(device), \
                                               torch.tensor(label_data).float().to(device), \
@@ -150,7 +153,7 @@ def test(model, test_type="valid"):
         return test_loss, acc
 
 
-def train(config, model, optimizer):
+def train(config, model, optimizer, file_name):
     """
     模型训练
 
@@ -158,13 +161,14 @@ def train(config, model, optimizer):
         config: 配置类的实例对象
         model: 模型的实例对象
         optimizer: 优化器
+        file_name: 准备好的数据集文件名
 
     Returns:
         None
     """
     print(f"[i] 开始训练...")
     epoch_num = config.epoch
-    batch_loader = BatchLoader(config.batch_size, "prepared_data")
+    batch_loader = BatchLoader(config.batch_size, f"prepared_{file_name}_data")
     num_of_batch, need_except = batch_loader.get_num_of_batch()
     if need_except:
         num_of_batch -= 1
@@ -236,6 +240,7 @@ def train(config, model, optimizer):
 
             # 保存在验证集上效果最好的模型
             if valid_acc > valid_best_acc:
+                print(f"[i] 在验证集上的准确率{valid_acc} 优于最优准确率{valid_best_acc}，保存模型")
                 valid_best_acc = valid_acc
                 # 将训练好的模型保存到文件中
                 print(f"[i] 保存模型到文件{model_save_path}中...")
@@ -271,10 +276,10 @@ if __name__ == '__main__':
     optimizer = optim.SGD(model.parameters(), lr=0.001, weight_decay=1e-4)
 
     # 测试模型的预测功能
-    check_pred(config, model)
+    check_pred(config, model, "train")
 
     # 训练
-    train(config, model, optimizer)
+    train(config, model, optimizer, "train")
 
     # 训练过程可视化
     with open(process_data_save_path, "rb") as f:

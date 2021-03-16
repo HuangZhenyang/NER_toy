@@ -78,7 +78,7 @@ def argmax(vec):
     """
     _, idx = torch.max(vec, 1)
 
-    return idx.item()
+    return idx
 
 
 def log_sum_exp(vec):
@@ -90,10 +90,13 @@ def log_sum_exp(vec):
     Returns:
 
     """
-    max_score = vec[0, argmax(vec)]
-    max_score_broadcast = max_score.view(1, -1).expand(1, vec.size()[1])
+    # argmax(vec): [tagset_size]
+    # max_score: [tagset_size]
+    max_score = vec[[i for i in range(len(vec))], argmax(vec)]  # 选出每一个一维数组中最大的
+
+    max_score_broadcast = max_score.view(1, -1).T.repeat(1, 1, len(vec))[0].clone()  # [tagset_size, tagset_size]
     return max_score + \
-           torch.log(torch.sum(torch.exp(vec - max_score_broadcast)))
+           torch.log(torch.sum(torch.exp(vec - max_score_broadcast), 1))
 
 
 class BiLSTMCRF(nn.Module):
@@ -126,7 +129,8 @@ class BiLSTMCRF(nn.Module):
         # === BiLSTM ===
         # 为不同的特征创建Embedding层
         self.embed_dict = {
-            fea: nn.Embedding(self.vocab_size_dict[fea], embed_config[fea + "_embed_dim"]).to(device) if fea != "label" else None
+            fea: nn.Embedding(self.vocab_size_dict[fea], embed_config[fea + "_embed_dim"]).to(
+                device) if fea != "label" else None
             for fea in map_dict.keys()
         }
         self.lstm = nn.LSTM(self.embedding_dim, self.hidden_dim // 2, num_layers=1, batch_first=True,
@@ -257,6 +261,22 @@ class BiLSTMCRF(nn.Module):
 
         for i, sentence_emi_mat in enumerate(emission_matrix):  # 对于每个句子的Emission Score: [seq_len, tagset_size]
             for j, word_emi_mat in enumerate(sentence_emi_mat):  # 对于单个字的Emission Score: [tagset_size]
+                forward_var_i = forward_var[i].clone()  # [1, tagset_size]
+                # [tagset_size] -> [1, tagset_size] -> [tagset_size, 1] -> [tagset_size, tagset_size]
+                word_emit_score = word_emi_mat.view(1, -1).T.repeat(1, 1, self.tagset_size)[0].to(device)
+                trans_score = self.transitions.to(device)  # [tagset_size, tagset_size]
+                next_tag_var = forward_var_i + trans_score + word_emit_score  # [tagset_size, tagset_size]
+
+                log_sum_exp_res = log_sum_exp(next_tag_var)  # [tagset_size]
+                forward_var[i] = log_sum_exp_res.view(1, -1)  # [1, tagset_size]
+
+            terminal_var = forward_var[i] + self.transitions[self.tag_to_ix[STOP_TAG]]
+            sentence_all_path_score = log_sum_exp(terminal_var).to(device)
+            all_path_score[i] = sentence_all_path_score
+
+        """
+        for i, sentence_emi_mat in enumerate(emission_matrix):  # 对于每个句子的Emission Score: [seq_len, tagset_size]
+            for j, word_emi_mat in enumerate(sentence_emi_mat):  # 对于单个字的Emission Score: [tagset_size]
                 alphas_t = []
                 for next_tag in range(self.tagset_size):  # 遍历每个tag
                     # 发射得分
@@ -270,6 +290,7 @@ class BiLSTMCRF(nn.Module):
             terminal_var = forward_var[i] + self.transitions[self.tag_to_ix[STOP_TAG]]
             sentence_all_path_score = log_sum_exp(terminal_var)
             all_path_score[i] = sentence_all_path_score
+        """
 
         # print(f"[i] P_{{1}}+...+P_{{N}} = \n\t{all_path_score}")
 
@@ -334,6 +355,14 @@ class BiLSTMCRF(nn.Module):
             backpointers = []
 
             for j, word_emi_mat in enumerate(sentence_emi_mat):  # 对于单个字的Emission Score: [tagset_size]
+                forward_var_i = forward_var[i].clone().to(device)  # [1, tagset_size]
+
+                next_tag_var = forward_var_i + self.transitions  # [tagset_size, tagset_size]
+                best_tag_id = argmax(next_tag_var)  # [tagset_size]
+                bptrs_t = best_tag_id
+                viterbivars_t = next_tag_var[[k for k in range(len(next_tag_var))], best_tag_id].clone().to(device)
+
+                """
                 bptrs_t = []
                 viterbivars_t = []
 
@@ -342,8 +371,10 @@ class BiLSTMCRF(nn.Module):
                     best_tag_id = argmax(next_tag_var)
                     bptrs_t.append(best_tag_id)
                     viterbivars_t.append(next_tag_var[0][best_tag_id].view(1))
-
-                forward_var[i] = (torch.cat(viterbivars_t) + word_emi_mat).view(1, -1)
+                """
+                viterbivars_t = [torch.tensor([k]) for k in viterbivars_t]
+                viterbivars_t_concat = torch.cat(viterbivars_t).clone().to(device)
+                forward_var[i] = (viterbivars_t_concat + word_emi_mat).view(1, -1).clone().to(device)
                 backpointers.append(bptrs_t)
 
             # 转移到STOP_TAG
@@ -396,11 +427,13 @@ if __name__ == '__main__':
     model = BiLSTMCRF(map_dict, config)
     with torch.no_grad():
         batch_loader = BatchLoader(config.batch_size, "prepared_data")
-        fea_data, label_data = next(batch_loader.iter_batch())
-        fea_data, label_data = torch.tensor(fea_data), torch.tensor(label_data)
+        fea_data, label_data, init_sentence_len = next(batch_loader.iter_batch())
+        fea_data, label_data, init_sentence_len = torch.tensor(fea_data).to(device), \
+                                                  torch.tensor(label_data).float().to(device), \
+                                                  torch.tensor(init_sentence_len).to(device)
         print(f"[i] Real Label Data: \n {label_data}")
         # model._embed_concat(fea_data)
         model.calc_loss(fea_data, label_data)
         batch_path_score, batch_best_path = model.forward(fea_data)
         print(
-            f"batch_path_score:\n{torch.tensor(batch_path_score)}\n\nbatch_best_path:\n{torch.tensor(batch_best_path)}")
+            f"batch_path_score:\n{torch.tensor(batch_path_score.clone())}\n\nbatch_best_path:\n{torch.tensor(batch_best_path.clone())}")

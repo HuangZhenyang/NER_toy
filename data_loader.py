@@ -281,10 +281,10 @@ class BatchLoader(object):
 
 
 if __name__ == '__main__':
-    file_name = "test"
-    # prepare_data(file_name)
-    batch_loader = BatchLoader(10, f"prepared_{file_name}_data")
-    fea_data, label_data, init_sentence_len = next(batch_loader.iter_batch())
-    print(len(fea_data), "\n\n", label_data)
-    print(batch_loader.get_num_of_batch())
-    print(init_sentence_len)
+    for file_name in ["train", "valid", "test"]:
+        prepare_data(file_name)
+        batch_loader = BatchLoader(10, f"prepared_{file_name}_data")
+        fea_data, label_data, init_sentence_len = next(batch_loader.iter_batch())
+        print(len(fea_data), "\n\n", label_data)
+        print(batch_loader.get_num_of_batch())
+        print(init_sentence_len)
