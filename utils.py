@@ -49,7 +49,7 @@ def load_sentences(file_path: str) -> tuple:
     all_label_list = []  # 保存所有句子中的标签
     label_list = []  # 保存当前句子中的标签
 
-    with open(train_file, "r", encoding="utf-8") as f:
+    with open(file_path, "r", encoding="utf-8") as f:
         for i, line in enumerate(tqdm(f.readlines(), ascii=True)):
             if line == "\n":  # 当前句子结束
                 if len(sentence_list) == 0:  # 跳过句子为\n的，即连着出现两个\n的情况
@@ -312,7 +312,7 @@ if __name__ == '__main__':
     train_id2label, train_label2id = label_encoder(train_label_list)  # 这个好像没什么用
     extract_features(train_sentence_list, train_label_list, "train")
 
-    # generate_dict("./data/train.csv", "map_dict")
+    generate_dict("./data/train.csv", "map_dict")
 
     # valid
     valid_sentence_list, valid_label_list = load_sentences(valid_file)

@@ -23,7 +23,7 @@ process_data_save_path = "./data/train_process_data.pkl"
 # 解析参数
 parser = argparse.ArgumentParser(description="Pytorch NER Toy")
 parser.add_argument('--epoch', type=int, help='Number of epoch', default=10)
-parser.add_argument('--batch_size', type=int, help='Batch size', default=10)
+parser.add_argument('--batch_size', type=int, help='Batch size', default=8)
 parser.add_argument('--hidden_dim', type=int, help='Hidden dimension of BiLSTM', default=128)
 parser.add_argument('--word_embed_dim', type=int, help='Word embedding dimension', default=100)
 parser.add_argument('--flag_embed_dim', type=int, help='Flag embedding dimension', default=50)
@@ -71,19 +71,20 @@ def info_plot(epoch_num, train_loss_list, train_acc_list, valid_x, valid_loss_li
     plt.show()
 
 
-def check_pred(config, model):
+def check_pred(config, model, file_name):
     """
     在训练之前测试一下模型的预测功能
 
     Args:
         config: 配置类的实例对象
         model: 模型的实例对象
+        file_name: 准备好的数据集文件名
 
     Returns:
         None
     """
     print("[i] check_pred: 训练之前测试模型的预测功能")
-    batch_loader = BatchLoader(config.batch_size, "prepared_data")
+    batch_loader = BatchLoader(config.batch_size, f"prepared_{file_name}_data")
     fea_data, label_data, init_sentence_len = next(batch_loader.iter_batch())
     fea_data, label_data, init_sentence_len = torch.tensor(fea_data), \
                                               torch.tensor(label_data), \
@@ -143,7 +144,7 @@ def test(model, test_type="valid"):
         return test_loss, acc
 
 
-def train(config, model, optimizer):
+def train(config, model, optimizer, file_name):
     """
     模型训练
 
@@ -151,13 +152,14 @@ def train(config, model, optimizer):
         config: 配置类的实例对象
         model: 模型的实例对象
         optimizer: 优化器
+        file_name: 准备好的数据集文件名
 
     Returns:
         None
     """
     print(f"[i] 开始训练...")
     epoch_num = config.epoch
-    batch_loader = BatchLoader(config.batch_size, "prepared_data")
+    batch_loader = BatchLoader(config.batch_size, f"prepared_{file_name}_data")
     num_of_batch, need_except = batch_loader.get_num_of_batch()
     if need_except:
         num_of_batch -= 1
@@ -254,22 +256,22 @@ def train(config, model, optimizer):
 
 
 if __name__ == '__main__':
-    # # 创建模型的实例对象
-    # with open("./data/map_dict.pkl", "rb") as f:
-    #     map_dict = pickle.load(f)
-    #
-    # config = Config(args.epoch, args.batch_size, args.hidden_dim, args.word_embed_dim, args.flag_embed_dim,
-    #                 args.bound_embed_dim, args.radical_embed_dim, args.pinyin_embed_dim)
-    #
-    # model = BiLSTMCRF(map_dict, config)
-    #
-    # optimizer = optim.SGD(model.parameters(), lr=0.001, weight_decay=1e-4)
-    #
-    # # 测试模型的预测功能
-    # check_pred(config, model)
-    #
-    # # 训练
-    # train(config, model, optimizer)
+    # 创建模型的实例对象
+    with open("./data/map_dict.pkl", "rb") as f:
+        map_dict = pickle.load(f)
+
+    config = Config(args.epoch, args.batch_size, args.hidden_dim, args.word_embed_dim, args.flag_embed_dim,
+                    args.bound_embed_dim, args.radical_embed_dim, args.pinyin_embed_dim)
+
+    model = BiLSTMCRF(map_dict, config)
+
+    optimizer = optim.SGD(model.parameters(), lr=0.001, weight_decay=1e-4)
+
+    # 测试模型的预测功能
+    check_pred(config, model, "train")
+
+    # 训练
+    train(config, model, optimizer, "train")
 
     # 训练过程可视化
     with open(process_data_save_path, "rb") as f:

@@ -73,3 +73,108 @@ D:\ProgramData\Anaconda3\envs\nlp\python.exe E:/Research/NLP/NER/NER_toy/train.p
 [i] 保存完毕
 
 Process finished with exit code 0
+
+
+
+
+
+
+D:\ProgramData\Anaconda3\envs\nlp\python.exe E:/Research/NLP/NER/NER_toy/evaluate.py
+[i] 读取文件: ./data/prepared_test_data.pkl
+100%|██████████| 2343/2343 [50:29<00:00,  1.29s/it]
+[i] 测试集. loss: 2.2123, accuracy: 98.6688%
+[i] 读取文件: ./data/prepared_test_data.pkl
+word	pred_label	real_label
+[i] === 句子[1] ===
+孙	O	O
+悦	O	O
+演	O	O
+唱	O	O
+--------------------------------
+[i] === 句子[2] ===
+num	O	O
+、	O	O
+UNK	B-music	O
+SPACE	O	O
+--------------------------------
+[i] === 句子[3] ===
+\	O	O
+n	O	O
+,	O	O
+撒	B-book	B-book
+野	I-book	I-book
+,	O	O
+--------------------------------
+[i] === 句子[4] ===
+《	O	O
+欢	B-music	B-music
+乐	I-music	I-music
+中	I-music	I-music
+国	I-music	I-music
+年	I-music	I-music
+》	O	O
+--------------------------------
+[i] === 句子[5] ===
+笑	B-book	B-book
+猫	I-book	I-book
+日	I-book	I-book
+记	I-book	I-book
+怎	O	O
+么	O	O
+样	O	O
+--------------------------------
+[i] === 句子[6] ===
+本	O	O
+人	O	O
+只	O	O
+看	O	O
+耽	O	O
+美	O	O
+撒	O	O
+--------------------------------
+[i] === 句子[7] ===
+男	O	O
+女	O	O
+是	O	O
+大	O	O
+学	O	O
+认	O	O
+识	O	O
+的	O	O
+--------------------------------
+[i] === 句子[8] ===
+顾	O	O
+先	O	O
+生	O	O
+，	O	O
+独	O	O
+UNK	O	O
+成	O	O
+瘾	O	O
+SPACE	O	O
+--------------------------------
+[i] === 句子[9] ===
+《	O	O
+全	B-book	B-book
+球	I-book	I-book
+高	I-book	I-book
+考	I-book	I-book
+》	O	O
+无	O	O
+限	O	O
+流	O	O
+--------------------------------
+[i] === 句子[10] ===
+所	O	O
+以	O	O
+推	O	O
+荐	O	O
+的	O	O
+都	O	O
+是	O	O
+耽	O	O
+美	O	O
+的	O	O
+--------------------------------
+
+Process finished with exit code 0
