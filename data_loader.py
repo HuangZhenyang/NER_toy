@@ -19,6 +19,8 @@ import random
 
 
 # 全局变量
+random_seed = 314
+random.seed(random_seed)
 
 
 def prepare_sequence(seq: list, item2id: dict) -> list:
@@ -256,12 +258,16 @@ class BatchLoader(object):
                 ]
 
             label_data:
-                [
-                    [ [填充后的句子1的label向量], [填充后的句子2的label向量], ...]
-                ]
+                    [
+                        [填充后的句子1的label向量],
+                        [填充后的句子2的label向量], ...
+                    ]
         """
         if shuffle:
+            random.seed(random_seed)
             random.shuffle(self.batch_data_list)
+            random.seed(random_seed)
+            random.shuffle(self.init_sentence_len_list)
 
         for i in range(self.batch_data_list_len):
             one_batch_data = self.batch_data_list[i]

@@ -39,6 +39,11 @@ def infer(model):
     fea_data, label_data, init_sentence_len = torch.tensor(fea_data), \
                                               torch.tensor(label_data), \
                                               torch.tensor(init_sentence_len)
+    with open("./data/map_dict.pkl", "rb") as f:
+        map_dict = pickle.load(f)
+
+
+
     with torch.no_grad():
         print(label_data)
         print(model(fea_data))

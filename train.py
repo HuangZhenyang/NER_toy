@@ -109,11 +109,11 @@ def test(model, test_type="valid"):
     num_of_batch, need_except = batch_loader.get_num_of_batch()
 
     with torch.no_grad():
-        loss = 0.0
+        test_loss = 0.0
         correct = 0
         total_word_num = 0
 
-        for fea_data, label_data, init_sentence_len in tqdm(batch_loader.iter_batch(), total=num_of_batch):
+        for fea_data, label_data, init_sentence_len in tqdm(batch_loader.iter_batch(shuffle=True), total=num_of_batch):
             if len(fea_data[0]) != config.batch_size:  # 对于最后一个不满足batch_size的batch，直接跳过
                 continue
 
@@ -133,14 +133,14 @@ def test(model, test_type="valid"):
 
             # 计算loss
             loss = model.calc_loss(fea_data, label_data)
-            loss += loss.mean().item()
+            test_loss += loss.mean().item()
 
         # loss
-        loss = loss / num_of_batch
+        test_loss = test_loss / num_of_batch
         # 准确率
         acc = correct / total_word_num * 100
 
-        return loss, acc
+        return test_loss, acc
 
 
 def train(config, model, optimizer):
@@ -167,6 +167,7 @@ def train(config, model, optimizer):
     valid_x = []  # 验证集的epoch下标
     valid_loss_list = []  # 验证集上的loss集合
     valid_acc_list = []  # 验证集上的准确率集合
+    valid_best_acc = -999  # 验证集上最优的准确率
 
     for epoch in range(epoch_num):
         print("=== Epoch {}/{} ===".format(epoch + 1, epoch_num))
@@ -176,7 +177,7 @@ def train(config, model, optimizer):
         total_word_num = 0  # 已经处理过的word数
 
         # 将所有的batch喂给模型进行训练
-        for fea_data, label_data, init_sentence_len in tqdm(batch_loader.iter_batch(), ascii=True, total=num_of_batch):
+        for fea_data, label_data, init_sentence_len in tqdm(batch_loader.iter_batch(shuffle=True), ascii=True, total=num_of_batch):
             if len(fea_data[0]) != config.batch_size:  # 对于最后一个不满足batch_size的batch，直接跳过
                 continue
 
@@ -221,18 +222,21 @@ def train(config, model, optimizer):
                                                                                            sp_time))
 
         # 在验证集上测试
-        if (epoch + 1) % 1 == 0:  # TODO:测试通过以后，记得改成5
+        if (epoch + 1) % 2 == 0:
             valid_x.append(epoch)
             valid_loss, valid_acc = test(model)
             print("[i] 验证集. loss: {:.4f}, accuracy: {:.4f}%".format(valid_loss, valid_acc))
+
+            # 保存在验证集上效果最好的模型
+            if valid_acc > valid_best_acc:
+                valid_best_acc = valid_acc
+                # 将训练好的模型保存到文件中
+                print(f"[i] 保存模型到文件{model_save_path}中...")
+                with open(model_save_path, "wb") as f:
+                    pickle.dump(model, f)
+                print(f"[i] 保存完毕")
             valid_loss_list.append(valid_loss)
             valid_acc_list.append(valid_acc)
-
-    # 将训练好的模型保存到文件中
-    print(f"[i] 保存模型到文件{model_save_path}中...")
-    with open(model_save_path, "wb") as f:
-        pickle.dump(model, f)
-    print(f"[i] 保存完毕")
 
     # 将训练过程中的数据保存到文件中，方便可视化
     train_process_data = {
