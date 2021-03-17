@@ -44,11 +44,13 @@ def infer(model, test_batch_num):
     """
     # 准备测试数据
     batch_loader = BatchLoader(config.batch_size, "prepared_test_data")
-    for i in range(test_batch_num):
-        fea_data, label_data, init_sentence_len = next(batch_loader.iter_batch())
-        fea_data, label_data, init_sentence_len = torch.tensor(fea_data).to(device), \
-                                                  torch.tensor(label_data).float().to(device), \
-                                                  torch.tensor(init_sentence_len).to(device)
+    # for i in range(test_batch_num):
+    for i, (fea_data, label_data, init_sentence_len) in enumerate(batch_loader.iter_batch()):
+        if i == 3:
+            break
+        fea_data, label_data, init_sentence_len = torch.tensor(fea_data), \
+                                                  torch.tensor(label_data).float(), \
+                                                  torch.tensor(init_sentence_len)
 
         with open("./data/map_dict.pkl", "rb") as f:
             map_dict = pickle.load(f)
@@ -70,7 +72,7 @@ def infer(model, test_batch_num):
 
             init_len = init_sentence_len[i]  # 句子的真实长度
 
-            for j in range(init_len):  # 对于句子中的每个字
+            for j in range(init_len.item()):  # 对于句子中的每个字
                 line = ""  # 每一行要打印的内容
                 line += id2word[sentence_word[j]] + " " * (15 - len(id2word[sentence_word[j]]))
                 line += id2label[pred_path[j]] + " " * (15 - len(id2label[pred_path[j]]))
