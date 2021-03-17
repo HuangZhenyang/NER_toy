@@ -38,7 +38,7 @@ parser.add_argument('--pinyin_embed_dim', type=int, help='Pinyin embedding dimen
 args = parser.parse_args()
 
 config = Config(args.epoch, args.batch_size, args.hidden_dim, args.word_embed_dim, args.flag_embed_dim,
-                    args.bound_embed_dim, args.radical_embed_dim, args.pinyin_embed_dim)
+                args.bound_embed_dim, args.radical_embed_dim, args.pinyin_embed_dim)
 
 
 def info_plot(epoch_num, train_loss_list, train_acc_list, valid_x, valid_loss_list, valid_acc_list):
@@ -188,7 +188,8 @@ def train(config, model, optimizer, file_name):
         total_word_num = 0  # 已经处理过的word数
 
         # 将所有的batch喂给模型进行训练
-        for fea_data, label_data, init_sentence_len in tqdm(batch_loader.iter_batch(shuffle=True), ascii=True, total=num_of_batch):
+        for fea_data, label_data, init_sentence_len in tqdm(batch_loader.iter_batch(shuffle=True), ascii=True,
+                                                            total=num_of_batch):
             if len(fea_data[0]) != config.batch_size:  # 对于最后一个不满足batch_size的batch，直接跳过
                 continue
 
@@ -233,14 +234,14 @@ def train(config, model, optimizer, file_name):
                                                                                            sp_time))
 
         # 在验证集上测试
-        if (epoch + 1) % 5 == 0:  # TODO:测试通过以后，记得改成5
+        if (epoch + 1) % 2 == 0:
             valid_x.append(epoch)
             valid_loss, valid_acc = test(model)
             print("[i] 验证集. loss: {:.4f}, accuracy: {:.4f}%".format(valid_loss, valid_acc))
 
             # 保存在验证集上效果最好的模型
             if valid_acc > valid_best_acc:
-                print(f"[i] 在验证集上的准确率{valid_acc} 优于最优准确率{valid_best_acc}，保存模型")
+                print("[i] 在验证集上的准确率{:.4f} 优于最优准确率{:.4f}，保存模型".format(valid_acc, valid_best_acc))
                 valid_best_acc = valid_acc
                 # 将训练好的模型保存到文件中
                 print(f"[i] 保存模型到文件{model_save_path}中...")

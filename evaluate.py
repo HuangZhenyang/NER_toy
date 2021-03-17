@@ -45,8 +45,9 @@ def infer(model, test_batch_num):
     """
     # 准备测试数据
     batch_loader = BatchLoader(config.batch_size, "prepared_test_data")
-    for i in range(test_batch_num):
-        fea_data, label_data, init_sentence_len = next(batch_loader.iter_batch())
+    for i, (fea_data, label_data, init_sentence_len) in enumerate(batch_loader.iter_batch()):
+        if i == 3:
+            break
         fea_data, label_data, init_sentence_len = torch.tensor(fea_data).to(device), \
                                                   torch.tensor(label_data).float().to(device), \
                                                   torch.tensor(init_sentence_len).to(device)

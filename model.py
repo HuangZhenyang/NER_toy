@@ -274,24 +274,6 @@ class BiLSTMCRF(nn.Module):
             sentence_all_path_score = log_sum_exp(terminal_var).to(device)
             all_path_score[i] = sentence_all_path_score
 
-        """
-        for i, sentence_emi_mat in enumerate(emission_matrix):  # 对于每个句子的Emission Score: [seq_len, tagset_size]
-            for j, word_emi_mat in enumerate(sentence_emi_mat):  # 对于单个字的Emission Score: [tagset_size]
-                alphas_t = []
-                for next_tag in range(self.tagset_size):  # 遍历每个tag
-                    # 发射得分
-                    # 先将发射得分变成[1,1]，再拓展成[1, tagset_size]
-                    emit_score = word_emi_mat[next_tag].view(1, -1).expand(1, self.tagset_size).to(device)
-                    # 转移得分, [tagset_size] -> [1, tagset_size]
-                    trans_score = self.transitions[next_tag].view(1, -1).to(device)
-                    next_tag_var = forward_var[i] + trans_score + emit_score  # [1, tagset_size]
-                    alphas_t.append(log_sum_exp(next_tag_var).view(1))  # 添加[1]
-                forward_var[i] = torch.cat(alphas_t).view(1, -1)
-            terminal_var = forward_var[i] + self.transitions[self.tag_to_ix[STOP_TAG]]
-            sentence_all_path_score = log_sum_exp(terminal_var)
-            all_path_score[i] = sentence_all_path_score
-        """
-
         # print(f"[i] P_{{1}}+...+P_{{N}} = \n\t{all_path_score}")
 
         return all_path_score
@@ -362,16 +344,6 @@ class BiLSTMCRF(nn.Module):
                 bptrs_t = best_tag_id
                 viterbivars_t = next_tag_var[[k for k in range(len(next_tag_var))], best_tag_id].clone().to(device)
 
-                """
-                bptrs_t = []
-                viterbivars_t = []
-
-                for next_tag in range(self.tagset_size):
-                    next_tag_var = forward_var[i] + self.transitions[next_tag]
-                    best_tag_id = argmax(next_tag_var)
-                    bptrs_t.append(best_tag_id)
-                    viterbivars_t.append(next_tag_var[0][best_tag_id].view(1))
-                """
                 viterbivars_t = [torch.tensor([k]) for k in viterbivars_t]
                 viterbivars_t_concat = torch.cat(viterbivars_t).clone().to(device)
                 forward_var[i] = (viterbivars_t_concat + word_emi_mat).view(1, -1).clone().to(device)
