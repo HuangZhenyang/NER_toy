@@ -156,6 +156,8 @@ def test(model, test_type="valid"):
         # loss
         test_loss = test_loss / num_of_batch
         # 精确率，召回率，f1_score
+        total_true_label = total_true_label.cpu()
+        total_pred_label = total_pred_label.cpu()
         ds_precision_score, ds_recall_score, ds_f1_score = precision_score(total_true_label, total_pred_label,
                                                                            average="micro"), \
                                                            recall_score(total_true_label, total_pred_label,
@@ -242,6 +244,8 @@ def train(config, model, optimizer, file_name):
         train_loss = train_loss / num_of_batch
         train_loss_list.append(train_loss)
         # 精确率，召回率，f1_score
+        total_true_label = total_true_label.cpu()
+        total_pred_label = total_pred_label.cpu()
         train_precision_score, train_recall_score, train_f1_score = precision_score(total_true_label, total_pred_label,
                                                                                     average="micro"), \
                                                                     recall_score(total_true_label, total_pred_label,
