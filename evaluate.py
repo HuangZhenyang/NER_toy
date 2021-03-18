@@ -28,8 +28,9 @@ def test_on_test_ds(model):
     Returns:
         None
     """
-    test_loss, test_acc = test(model, "test")
-    print("[i] 测试集. loss: {:.4f}, accuracy: {:.4f}%".format(test_loss, test_acc))
+    test_loss, test_precision_score, test_recall_score, test_f1_score = test(model, "test")
+    print("[i] 验证集. loss: {:.4f}, precision_score: {:.4f}, recall_score: {:.4f}, f1_score: {:.4f}".format(
+        test_loss, test_precision_score, test_recall_score, test_f1_score))
 
 
 def infer(model, test_batch_num):
@@ -45,8 +46,8 @@ def infer(model, test_batch_num):
     """
     # 准备测试数据
     batch_loader = BatchLoader(config.batch_size, "prepared_test_data")
-    for i, (fea_data, label_data, init_sentence_len) in enumerate(batch_loader.iter_batch()):
-        if i == 3:
+    for batch_num, (fea_data, label_data, init_sentence_len) in enumerate(batch_loader.iter_batch(shuffle=True)):
+        if batch_num == test_batch_num:
             break
         fea_data, label_data, init_sentence_len = torch.tensor(fea_data).to(device), \
                                                   torch.tensor(label_data).float().to(device), \

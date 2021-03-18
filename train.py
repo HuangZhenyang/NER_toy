@@ -17,6 +17,8 @@ import time
 import pickle
 from model import Config, BatchLoader, BiLSTMCRF
 import matplotlib.pyplot as plt
+from sklearn.metrics import precision_score, recall_score, f1_score
+
 
 # 全局变量
 torch.cuda.manual_seed(1)  # 为GPU设置随机种子
@@ -120,8 +122,8 @@ def test(model, test_type="valid"):
 
     with torch.no_grad():
         test_loss = 0.0
-        correct = 0
-        total_word_num = 0
+        total_true_label = torch.tensor([])
+        total_pred_label = torch.tensor([])
 
         for fea_data, label_data, init_sentence_len in tqdm(batch_loader.iter_batch(shuffle=True), total=num_of_batch):
             if len(fea_data[0]) != config.batch_size:  # 对于最后一个不满足batch_size的batch，直接跳过
@@ -130,16 +132,22 @@ def test(model, test_type="valid"):
             fea_data, label_data, init_sentence_len = torch.tensor(fea_data).to(device), \
                                                       torch.tensor(label_data).float().to(device), \
                                                       torch.tensor(init_sentence_len).to(device)
-            total_word_num += init_sentence_len.sum().item()
 
-            _, batch_best_path = model.forward(fea_data)
+            _, batch_best_path = model(fea_data)
 
-            # 正确预测出的label的个数，不包括padding的部分
-            for i in range(len(label_data)):  # 对于每一句话的label
-                sentence_len = init_sentence_len[i]
-                tmp_label_data = label_data[i][:sentence_len]
-                tmp_batch_best_path = batch_best_path[i][:sentence_len].to(device)
-                correct += (tmp_label_data == tmp_batch_best_path).sum().item()
+            if (not total_true_label.numel()) and (not total_pred_label.numel()):  # 如果还未初始化
+                total_true_label = torch.cat(
+                    [sentence[:sentence_end] for sentence, sentence_end in zip(label_data, init_sentence_len)])
+                total_pred_label = torch.cat(
+                    [sentence[:sentence_end] for sentence, sentence_end in zip(batch_best_path, init_sentence_len)])
+            else:
+                tmp_true_label = torch.cat(
+                    [sentence[:sentence_end] for sentence, sentence_end in zip(label_data, init_sentence_len)])
+                tmp_pred_label = torch.cat(
+                    [sentence[:sentence_end] for sentence, sentence_end in zip(batch_best_path, init_sentence_len)])
+
+                total_true_label = torch.cat([total_true_label, tmp_true_label], -1)
+                total_pred_label = torch.cat([total_pred_label, tmp_pred_label], -1)
 
             # 计算loss
             loss = model.calc_loss(fea_data, label_data)
@@ -147,10 +155,14 @@ def test(model, test_type="valid"):
 
         # loss
         test_loss = test_loss / num_of_batch
-        # 准确率
-        acc = correct / total_word_num * 100
+        # 精确率，召回率，f1_score
+        ds_precision_score, ds_recall_score, ds_f1_score = precision_score(total_true_label, total_pred_label,
+                                                                           average="micro"), \
+                                                           recall_score(total_true_label, total_pred_label,
+                                                                        average="micro"), \
+                                                           f1_score(total_true_label, total_pred_label, average="micro")
 
-        return test_loss, acc
+        return test_loss, ds_precision_score, ds_recall_score, ds_f1_score
 
 
 def train(config, model, optimizer, file_name):
@@ -177,15 +189,15 @@ def train(config, model, optimizer, file_name):
     train_acc_list = []  # 保存每个epoch的准确率
     valid_x = []  # 验证集的epoch下标
     valid_loss_list = []  # 验证集上的loss集合
-    valid_acc_list = []  # 验证集上的准确率集合
-    valid_best_acc = -999  # 验证集上效果最好的准确率
+    valid_f1_list = []  # 验证集上的f1_score集合
+    valid_best_f1 = -999  # 验证集上最优的f1_score
 
     for epoch in range(epoch_num):
         print("=== Epoch {}/{} ===".format(epoch + 1, epoch_num))
         st_time = time.time()
         train_loss = 0.0
-        train_correct = 0.0  # 预测正确的句子数
-        total_word_num = 0  # 已经处理过的word数
+        total_true_label = torch.tensor([])
+        total_pred_label = torch.tensor([])
 
         # 将所有的batch喂给模型进行训练
         for fea_data, label_data, init_sentence_len in tqdm(batch_loader.iter_batch(shuffle=True), ascii=True,
@@ -196,19 +208,25 @@ def train(config, model, optimizer, file_name):
             fea_data, label_data, init_sentence_len = torch.tensor(fea_data).to(device), \
                                                       torch.tensor(label_data).float().to(device), \
                                                       torch.tensor(init_sentence_len).to(device)
-            total_word_num += init_sentence_len.sum().item()
 
             # PyTorch默认会累积梯度; 而我们需要每条样本单独算梯度，因此需要重置
             model.zero_grad()
 
             _, batch_best_path = model.forward(fea_data)
 
-            # 正确预测出的label的个数，不包括padding的部分
-            for i in range(len(label_data)):  # 对于每一句话的label
-                sentence_len = init_sentence_len[i]
-                tmp_label_data = label_data[i][:sentence_len]
-                tmp_batch_best_path = batch_best_path[i][:sentence_len].to(device)
-                train_correct += (tmp_label_data == tmp_batch_best_path).sum().item()
+            if (not total_true_label.numel()) and (not total_pred_label.numel()):  # 如果还未初始化
+                total_true_label = torch.cat(
+                    [sentence[:sentence_end] for sentence, sentence_end in zip(label_data, init_sentence_len)])
+                total_pred_label = torch.cat(
+                    [sentence[:sentence_end] for sentence, sentence_end in zip(batch_best_path, init_sentence_len)])
+            else:
+                tmp_true_label = torch.cat(
+                    [sentence[:sentence_end] for sentence, sentence_end in zip(label_data, init_sentence_len)])
+                tmp_pred_label = torch.cat(
+                    [sentence[:sentence_end] for sentence, sentence_end in zip(batch_best_path, init_sentence_len)])
+
+                total_true_label = torch.cat([total_true_label, tmp_true_label], -1)
+                total_pred_label = torch.cat([total_pred_label, tmp_pred_label], -1)
 
             # 计算loss
             loss = model.calc_loss(fea_data, label_data)
@@ -223,33 +241,38 @@ def train(config, model, optimizer, file_name):
         # loss
         train_loss = train_loss / num_of_batch
         train_loss_list.append(train_loss)
-        # 准确率
-        train_acc = train_correct / total_word_num * 100
-        train_acc_list.append(train_acc)
+        # 精确率，召回率，f1_score
+        train_precision_score, train_recall_score, train_f1_score = precision_score(total_true_label, total_pred_label,
+                                                                                    average="micro"), \
+                                                                    recall_score(total_true_label, total_pred_label,
+                                                                                 average="micro"), \
+                                                                    f1_score(total_true_label, total_pred_label,
+                                                                             average="micro")
         # 花费时间
         ed_time = time.time()
         sp_time = ed_time - st_time
 
-        print("[i] loss: {:.4f}, training accuracy: {:.4f}%, spending time: {:.2f}".format(train_loss, train_acc,
-                                                                                           sp_time))
+        print(
+            "[i] loss: {:.4f}, precision_score: {:.4f}, recall_score: {:.4f}, f1_score: {:.4f}, spending time: {:.2f}s".format(
+                train_loss, train_precision_score, train_recall_score, train_f1_score, sp_time))
 
         # 在验证集上测试
         if (epoch + 1) % 2 == 0:
             valid_x.append(epoch)
-            valid_loss, valid_acc = test(model)
-            print("[i] 验证集. loss: {:.4f}, accuracy: {:.4f}%".format(valid_loss, valid_acc))
+            valid_loss, valid_precision_score, valid_recall_score, valid_f1_score = test(model)
+            print("[i] 验证集. loss: {:.4f}, precision_score: {:.4f}, recall_score: {:.4f}, f1_score: {:.4f}".format(
+                valid_loss, valid_precision_score, valid_recall_score, valid_f1_score))
 
             # 保存在验证集上效果最好的模型
-            if valid_acc > valid_best_acc:
-                print("[i] 在验证集上的准确率{:.4f} 优于最优准确率{:.4f}，保存模型".format(valid_acc, valid_best_acc))
-                valid_best_acc = valid_acc
+            if valid_f1_score > valid_best_f1:
+                valid_best_f1 = valid_f1_score
                 # 将训练好的模型保存到文件中
                 print(f"[i] 保存模型到文件{model_save_path}中...")
                 with open(model_save_path, "wb") as f:
                     pickle.dump(model, f)
                 print(f"[i] 保存完毕")
             valid_loss_list.append(valid_loss)
-            valid_acc_list.append(valid_acc)
+            valid_f1_list.append(valid_f1_score)
 
     # 将训练过程中的数据保存到文件中，方便可视化
     train_process_data = {
@@ -258,7 +281,7 @@ def train(config, model, optimizer, file_name):
         "train_acc_list": train_acc_list,
         "valid_x": valid_x,
         "valid_loss_list": valid_loss_list,
-        "valid_acc_list": valid_acc_list
+        "valid_f1_list": valid_f1_list
     }
     print(f"[i] 保存训练过程数据到文件{process_data_save_path}中...")
     with open(process_data_save_path, "wb") as f:
@@ -290,6 +313,6 @@ if __name__ == '__main__':
     train_acc_list = train_process_data["train_acc_list"]
     valid_x = train_process_data["valid_x"]
     valid_loss_list = train_process_data["valid_loss_list"]
-    valid_acc_list = train_process_data["valid_acc_list"]
+    valid_f1_list = train_process_data["valid_f1_list"]
 
-    info_plot(epoch_num, train_loss_list, train_acc_list, valid_x, valid_loss_list, valid_acc_list)
+    info_plot(epoch_num, train_loss_list, train_acc_list, valid_x, valid_loss_list, valid_f1_list)
