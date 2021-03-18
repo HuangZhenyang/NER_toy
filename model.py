@@ -28,7 +28,7 @@ class Config(object):
     保存配置的类
     """
 
-    def __init__(self, epoch=100, batch_size=10, hidden_dim=128, word_embed_dim=100, flag_embed_dim=50,
+    def __init__(self, epoch=100, batch_size=8, hidden_dim=128, word_embed_dim=100, flag_embed_dim=50,
                  bound_embed_dim=50, radical_embed_dim=50, pinyin_embed_dim=80):
         self.epoch = epoch
         self.batch_size = batch_size
