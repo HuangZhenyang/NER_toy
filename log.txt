@@ -1,180 +1,125 @@
 D:\ProgramData\Anaconda3\envs\nlp\python.exe E:/Research/NLP/NER/NER_toy/train.py
 [i] check_pred: 训练之前测试模型的预测功能
-[i] 读取文件: ./data/prepared_data.pkl
-(tensor([15.7534, 15.9218, 16.1861, 15.4076, 16.1066, 16.2946, 15.9021, 15.9107,
-        15.6533, 16.0710]), tensor([[2, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-        [2, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-        [5, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-        [5, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-        [2, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-        [5, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-        [2, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-        [2, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-        [2, 1, 0, 1, 0, 1, 0, 1, 0, 2],
-        [5, 1, 0, 1, 0, 1, 0, 1, 0, 2]]))
+[i] 读取文件: ./data/prepared_train_data.pkl
+(tensor([18.3869, 18.2530, 17.4389, 16.8591, 18.0329, 17.9724, 17.2347, 18.0113]), tensor([[3, 3, 3, 3, 3, 3, 3, 3, 3],
+        [3, 3, 3, 3, 3, 3, 3, 3, 3],
+        [3, 3, 5, 3, 3, 3, 3, 3, 3],
+        [3, 3, 3, 3, 3, 3, 3, 3, 3],
+        [3, 3, 3, 3, 3, 3, 3, 3, 3],
+        [3, 3, 3, 3, 3, 3, 3, 3, 3],
+        [3, 3, 3, 5, 3, 5, 3, 3, 3],
+        [3, 3, 3, 3, 3, 3, 3, 3, 3]]))
 [i] 开始训练...
-[i] 读取文件: ./data/prepared_data.pkl
-  0%|          | 0/2342 [00:00<?, ?it/s]=== Epoch 1/10 ===
-2343it [2:16:01,  3.48s/it]
-  0%|          | 0/2342 [00:00<?, ?it/s][i] loss: 22.8618, training accuracy: 90.8247%, spending time: 8161.53
-=== Epoch 2/10 ===
-2343it [2:17:49,  3.53s/it]
-[i] loss: 9.9311, training accuracy: 93.3651%, spending time: 8269.52
+[i] 读取文件: ./data/prepared_train_data.pkl
+  0%|          | 0/2928 [00:00<?, ?it/s]=== Epoch 1/20 ===
+100%|##########| 2928/2928 [2:13:09<00:00,  2.73s/it]
+[i] loss: 20.5378, precision_score: 0.7933, recall_score: 0.3797, f1_score: 0.5136, spending time: 8233.65s
+=== Epoch 2/20 ===
+100%|##########| 2928/2928 [2:12:41<00:00,  2.72s/it]
+[i] loss: 8.3788, precision_score: 0.8374, recall_score: 0.6223, f1_score: 0.7140, spending time: 8235.77s
 [i] 读取文件: ./data/prepared_valid_data.pkl
-100%|██████████| 2343/2343 [53:39<00:00,  1.37s/it]
-[i] 验证集. loss: 8.0097, accuracy: 94.4798%
-[i] 保存模型到文件./data/model.pkl中...
-  0%|          | 0/2342 [00:00<?, ?it/s][i] 保存完毕
-=== Epoch 3/10 ===
-2343it [2:16:25,  3.49s/it]
-  0%|          | 0/2342 [00:00<?, ?it/s][i] loss: 7.1453, training accuracy: 94.8685%, spending time: 8185.54
-=== Epoch 4/10 ===
-2343it [2:14:54,  3.45s/it]
-[i] loss: 5.6573, training accuracy: 95.8767%, spending time: 8094.11
-[i] 读取文件: ./data/prepared_valid_data.pkl
-100%|██████████| 2343/2343 [50:13<00:00,  1.29s/it]
-[i] 验证集. loss: 4.9541, accuracy: 96.4786%
+100%|██████████| 366/366 [06:21<00:00,  1.04s/it]
+[i] 验证集. loss: 8.2766, precision_score: 0.7965, recall_score: 0.6936, f1_score: 0.7415
+[i] 验证集上的效果: 0.7415 优于已有的最优效果: -999.0000
 [i] 保存模型到文件./data/model.pkl中...
 [i] 保存完毕
-=== Epoch 5/10 ===
-2343it [2:12:49,  3.40s/it]
-  0%|          | 0/2342 [00:00<?, ?it/s][i] loss: 4.7317, training accuracy: 96.5267%, spending time: 7969.45
-=== Epoch 6/10 ===
-2343it [2:12:50,  3.40s/it]
-[i] loss: 4.0519, training accuracy: 97.1094%, spending time: 7970.08
+=== Epoch 3/20 ===
+100%|##########| 2928/2928 [2:14:42<00:00,  2.76s/it]
+[i] loss: 6.0059, precision_score: 0.8478, recall_score: 0.7026, f1_score: 0.7684, spending time: 8369.76s
+=== Epoch 4/20 ===
+100%|##########| 2928/2928 [2:13:14<00:00,  2.73s/it]
+[i] loss: 4.8141, precision_score: 0.8657, recall_score: 0.7512, f1_score: 0.8044, spending time: 8277.70s
 [i] 读取文件: ./data/prepared_valid_data.pkl
-100%|██████████| 2343/2343 [49:59<00:00,  1.28s/it]
-[i] 验证集. loss: 3.7057, accuracy: 97.4017%
+100%|██████████| 366/366 [06:17<00:00,  1.03s/it]
+[i] 验证集. loss: 6.9727, precision_score: 0.8203, recall_score: 0.7354, f1_score: 0.7755
+[i] 验证集上的效果: 0.7755 优于已有的最优效果: 0.7415
 [i] 保存模型到文件./data/model.pkl中...
 [i] 保存完毕
-=== Epoch 7/10 ===
-2343it [2:13:50,  3.43s/it]
-  0%|          | 0/2342 [00:00<?, ?it/s][i] loss: 3.5125, training accuracy: 97.5336%, spending time: 8030.75
-=== Epoch 8/10 ===
-2343it [2:17:51,  3.53s/it]
-[i] loss: 3.1047, training accuracy: 97.8963%, spending time: 8271.63
+=== Epoch 5/20 ===
+100%|##########| 2928/2928 [2:12:42<00:00,  2.72s/it]
+[i] loss: 4.0369, precision_score: 0.8787, recall_score: 0.7867, f1_score: 0.8302, spending time: 8248.61s
+=== Epoch 6/20 ===
+100%|##########| 2928/2928 [2:14:03<00:00,  2.75s/it]
+[i] loss: 3.4817, precision_score: 0.8910, recall_score: 0.8112, f1_score: 0.8492, spending time: 8332.01s
 [i] 读取文件: ./data/prepared_valid_data.pkl
-100%|██████████| 2343/2343 [51:49<00:00,  1.33s/it]
-[i] 验证集. loss: 2.8928, accuracy: 97.9297%
+100%|██████████| 366/366 [06:24<00:00,  1.05s/it]
+[i] 验证集. loss: 6.9334, precision_score: 0.7893, recall_score: 0.7791, f1_score: 0.7842
+[i] 验证集上的效果: 0.7842 优于已有的最优效果: 0.7755
 [i] 保存模型到文件./data/model.pkl中...
 [i] 保存完毕
-=== Epoch 9/10 ===
-2343it [2:17:17,  3.52s/it]
-  0%|          | 0/2342 [00:00<?, ?it/s][i] loss: 2.7531, training accuracy: 98.1726%, spending time: 8237.49
-=== Epoch 10/10 ===
-2343it [2:17:49,  3.53s/it]
-[i] loss: 2.4758, training accuracy: 98.4229%, spending time: 8269.77
+=== Epoch 7/20 ===
+100%|##########| 2928/2928 [2:13:44<00:00,  2.74s/it]
+  0%|          | 0/2928 [00:00<?, ?it/s][i] loss: 3.0264, precision_score: 0.8996, recall_score: 0.8320, f1_score: 0.8645, spending time: 8308.95s
+=== Epoch 8/20 ===
+100%|##########| 2928/2928 [2:12:58<00:00,  2.72s/it]
+[i] loss: 2.6596, precision_score: 0.9096, recall_score: 0.8496, f1_score: 0.8786, spending time: 8266.19s
 [i] 读取文件: ./data/prepared_valid_data.pkl
-100%|██████████| 2343/2343 [50:35<00:00,  1.30s/it]
-[i] 验证集. loss: 2.2064, accuracy: 98.6693%
+100%|██████████| 366/366 [06:16<00:00,  1.03s/it]
+[i] 验证集. loss: 6.9927, precision_score: 0.8105, recall_score: 0.7690, f1_score: 0.7892
+[i] 验证集上的效果: 0.7892 优于已有的最优效果: 0.7842
 [i] 保存模型到文件./data/model.pkl中...
 [i] 保存完毕
+=== Epoch 9/20 ===
+100%|##########| 2928/2928 [2:13:05<00:00,  2.73s/it]
+[i] loss: 2.3385, precision_score: 0.9182, recall_score: 0.8662, f1_score: 0.8914, spending time: 8269.62s
+=== Epoch 10/20 ===
+100%|##########| 2928/2928 [2:13:17<00:00,  2.73s/it]
+[i] loss: 2.0502, precision_score: 0.9247, recall_score: 0.8794, f1_score: 0.9015, spending time: 8279.10s
+[i] 读取文件: ./data/prepared_valid_data.pkl
+100%|██████████| 366/366 [06:20<00:00,  1.04s/it]
+[i] 验证集. loss: 7.3656, precision_score: 0.8101, recall_score: 0.7747, f1_score: 0.7920
+[i] 验证集上的效果: 0.7920 优于已有的最优效果: 0.7892
+[i] 保存模型到文件./data/model.pkl中...
+[i] 保存完毕
+=== Epoch 11/20 ===
+100%|##########| 2928/2928 [2:13:47<00:00,  2.74s/it]
+[i] loss: 1.8076, precision_score: 0.9315, recall_score: 0.8910, f1_score: 0.9108, spending time: 8317.00s
+=== Epoch 12/20 ===
+100%|##########| 2928/2928 [2:14:30<00:00,  2.76s/it]
+[i] loss: 1.6186, precision_score: 0.9387, recall_score: 0.9040, f1_score: 0.9210, spending time: 8356.53s
+[i] 读取文件: ./data/prepared_valid_data.pkl
+100%|██████████| 366/366 [06:29<00:00,  1.06s/it]
+[i] 验证集. loss: 7.8329, precision_score: 0.8273, recall_score: 0.7596, f1_score: 0.7920
+=== Epoch 13/20 ===
+100%|##########| 2928/2928 [2:15:22<00:00,  2.77s/it]
+[i] loss: 1.4908, precision_score: 0.9435, recall_score: 0.9122, f1_score: 0.9276, spending time: 8410.68s
+=== Epoch 14/20 ===
+100%|##########| 2928/2928 [2:14:54<00:00,  2.76s/it]
+[i] loss: 1.2816, precision_score: 0.9496, recall_score: 0.9219, f1_score: 0.9355, spending time: 8376.95s
+[i] 读取文件: ./data/prepared_valid_data.pkl
+100%|██████████| 366/366 [06:19<00:00,  1.04s/it]
+[i] 验证集. loss: 8.6263, precision_score: 0.8454, recall_score: 0.7107, f1_score: 0.7722
+=== Epoch 15/20 ===
+100%|##########| 2928/2928 [2:16:23<00:00,  2.79s/it]
+[i] loss: 1.1663, precision_score: 0.9544, recall_score: 0.9298, f1_score: 0.9419, spending time: 8483.31s
+=== Epoch 16/20 ===
+100%|##########| 2928/2928 [2:15:26<00:00,  2.78s/it]
+[i] loss: 1.0570, precision_score: 0.9589, recall_score: 0.9362, f1_score: 0.9474, spending time: 8411.46s
+[i] 读取文件: ./data/prepared_valid_data.pkl
+100%|██████████| 366/366 [06:22<00:00,  1.05s/it]
+[i] 验证集. loss: 9.0439, precision_score: 0.8463, recall_score: 0.7371, f1_score: 0.7879
+=== Epoch 17/20 ===
+100%|##########| 2928/2928 [2:15:07<00:00,  2.77s/it]
+  0%|          | 0/2928 [00:00<?, ?it/s][i] loss: 0.9585, precision_score: 0.9637, recall_score: 0.9430, f1_score: 0.9532, spending time: 8389.84s
+=== Epoch 18/20 ===
+100%|##########| 2928/2928 [2:13:54<00:00,  2.74s/it]
+[i] loss: 0.8657, precision_score: 0.9668, recall_score: 0.9494, f1_score: 0.9580, spending time: 8314.36s
+[i] 读取文件: ./data/prepared_valid_data.pkl
+100%|██████████| 366/366 [06:19<00:00,  1.04s/it]
+[i] 验证集. loss: 9.3320, precision_score: 0.8033, recall_score: 0.7826, f1_score: 0.7928
+[i] 验证集上的效果: 0.7928 优于已有的最优效果: 0.7920
+[i] 保存模型到文件./data/model.pkl中...
+[i] 保存完毕
+=== Epoch 19/20 ===
+100%|##########| 2928/2928 [2:13:31<00:00,  2.74s/it]
+[i] loss: 0.7882, precision_score: 0.9701, recall_score: 0.9533, f1_score: 0.9616, spending time: 8290.12s
+=== Epoch 20/20 ===
+100%|##########| 2928/2928 [2:13:47<00:00,  2.74s/it]
+[i] loss: 0.7221, precision_score: 0.9731, recall_score: 0.9576, f1_score: 0.9653, spending time: 8358.08s
+[i] 读取文件: ./data/prepared_valid_data.pkl
+100%|██████████| 366/366 [06:24<00:00,  1.05s/it]
+[i] 验证集. loss: 9.5377, precision_score: 0.8173, recall_score: 0.7648, f1_score: 0.7902
 [i] 保存训练过程数据到文件./data/train_process_data.pkl中...
 [i] 保存完毕
-
-Process finished with exit code 0
-
-
-
-
-
-
-D:\ProgramData\Anaconda3\envs\nlp\python.exe E:/Research/NLP/NER/NER_toy/evaluate.py
-[i] 读取文件: ./data/prepared_test_data.pkl
-100%|██████████| 2343/2343 [50:29<00:00,  1.29s/it]
-[i] 测试集. loss: 2.2123, accuracy: 98.6688%
-[i] 读取文件: ./data/prepared_test_data.pkl
-word	pred_label	real_label
-[i] === 句子[1] ===
-孙	O	O
-悦	O	O
-演	O	O
-唱	O	O
---------------------------------
-[i] === 句子[2] ===
-num	O	O
-、	O	O
-UNK	B-music	O
-SPACE	O	O
---------------------------------
-[i] === 句子[3] ===
-\	O	O
-n	O	O
-,	O	O
-撒	B-book	B-book
-野	I-book	I-book
-,	O	O
---------------------------------
-[i] === 句子[4] ===
-《	O	O
-欢	B-music	B-music
-乐	I-music	I-music
-中	I-music	I-music
-国	I-music	I-music
-年	I-music	I-music
-》	O	O
---------------------------------
-[i] === 句子[5] ===
-笑	B-book	B-book
-猫	I-book	I-book
-日	I-book	I-book
-记	I-book	I-book
-怎	O	O
-么	O	O
-样	O	O
---------------------------------
-[i] === 句子[6] ===
-本	O	O
-人	O	O
-只	O	O
-看	O	O
-耽	O	O
-美	O	O
-撒	O	O
---------------------------------
-[i] === 句子[7] ===
-男	O	O
-女	O	O
-是	O	O
-大	O	O
-学	O	O
-认	O	O
-识	O	O
-的	O	O
---------------------------------
-[i] === 句子[8] ===
-顾	O	O
-先	O	O
-生	O	O
-，	O	O
-独	O	O
-UNK	O	O
-成	O	O
-瘾	O	O
-SPACE	O	O
---------------------------------
-[i] === 句子[9] ===
-《	O	O
-全	B-book	B-book
-球	I-book	I-book
-高	I-book	I-book
-考	I-book	I-book
-》	O	O
-无	O	O
-限	O	O
-流	O	O
---------------------------------
-[i] === 句子[10] ===
-所	O	O
-以	O	O
-推	O	O
-荐	O	O
-的	O	O
-都	O	O
-是	O	O
-耽	O	O
-美	O	O
-的	O	O
---------------------------------
 
 Process finished with exit code 0

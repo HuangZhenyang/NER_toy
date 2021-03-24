@@ -51,7 +51,7 @@ if __name__ == '__main__':
             print(map_dict[each][1])
             print(len(map_dict[each][1]))
 
-    batch_loader = BatchLoader(10, "prepared_data")
-    for a, b in batch_loader.iter_batch():
-        print(len(a[0]))
+    batch_loader = BatchLoader(10, "prepared_train_data")
+    # for a, b, c in batch_loader.iter_batch():
+    #     print(len(a[0]))
 

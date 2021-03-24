@@ -16,14 +16,14 @@ import argparse  # 命令行参数
 import time
 from model import *
 import matplotlib.pyplot as plt
-from sklearn.metrics import precision_score, recall_score, f1_score
+import numpy as np
 
 # 全局变量
 model_save_path = "./data/model.pkl"
 process_data_save_path = "./data/train_process_data.pkl"
 # 解析参数
 parser = argparse.ArgumentParser(description="Pytorch NER Toy")
-parser.add_argument('--epoch', type=int, help='Number of epoch', default=10)
+parser.add_argument('--epoch', type=int, help='Number of epoch', default=20)
 parser.add_argument('--batch_size', type=int, help='Batch size', default=8)
 parser.add_argument('--hidden_dim', type=int, help='Hidden dimension of BiLSTM', default=128)
 parser.add_argument('--word_embed_dim', type=int, help='Word embedding dimension', default=100)
@@ -62,12 +62,13 @@ def info_plot(epoch_num, train_loss_list, train_acc_list, valid_x, valid_loss_li
     plt.ylabel("loss")
 
     # accuracy
-    plt.plot(train_x, train_acc_list, "-", color="red", label="training accuracy")
-    plt.plot(valid_x, valid_f1_list, ".-", color="green", label="validating accuracy")
+    plt.subplot(2, 1, 2)
+    plt.plot(train_x, train_acc_list, "-", color="red", label="training f1")
+    plt.plot(valid_x, valid_f1_list, ".-", color="green", label="validating f1")
     plt.legend()
-    plt.title("accuracy vs. epoch")
+    plt.title("f1 vs. epoch")
     plt.xlabel("epoch")
-    plt.ylabel("accuracy")
+    plt.ylabel("f1")
 
     plt.show()
 
@@ -85,6 +86,7 @@ def check_pred(config, model, file_name):
         None
     """
     print("[i] check_pred: 训练之前测试模型的预测功能")
+    model.eval()
     batch_loader = BatchLoader(config.batch_size, f"prepared_{file_name}_data")
     fea_data, label_data, init_sentence_len = next(batch_loader.iter_batch())
     fea_data, label_data, init_sentence_len = torch.tensor(fea_data), \
@@ -92,6 +94,90 @@ def check_pred(config, model, file_name):
                                               torch.tensor(init_sentence_len)
     with torch.no_grad():
         print(model(fea_data))
+
+
+def get_tag_bound_list(y_list, label2id):
+    """
+    获取实体的边界数组
+
+    Args:
+        y_list: label list
+        label2id: label to index
+
+    Returns:
+        tag_bound_list: [ [3, 5], [8, 11], ...]
+    """
+    tag_bound_list = []
+    begin_idx_list = [label2id[i] for i in label2id.keys() if "B-" in i]
+    inner_idx_list = [label2id[i] for i in label2id.keys() if "I-" in i]
+    other_idx = label2id.get("O")
+    BEGIN_INI = -1  # 当前tag的起始的默认值
+    begin = BEGIN_INI  # 当前tag的起始
+    end = 0  # 当前tag的结束索引 + 1 (加1后的索引是当前tag的下一个O的)
+    y_list_len = len(y_list)
+
+    for i, label_idx in enumerate(y_list):  # 对于标签集合中的每一个标签
+        if begin == BEGIN_INI and label_idx in begin_idx_list:  # 以B-开头
+            begin = i
+        elif begin != BEGIN_INI and label_idx == other_idx:  # 当前tag的起始是有值的，并且当前的label index是O的index
+            end = i
+            tag_bound_list.append([begin, end])
+            begin = BEGIN_INI
+        elif begin != BEGIN_INI and label_idx in begin_idx_list:  # 当前tag的起始是有值的，并且遇到了下一个实体的起始（连着两个实体）
+            end = i
+            tag_bound_list.append([begin, end])
+            begin = i
+        elif begin != BEGIN_INI and i == y_list_len - 1:  # 当前tag的起始是有值的，并且I-的index是y_list的最后一个值
+            end = i
+            tag_bound_list.append([begin, end])
+            begin = BEGIN_INI
+
+    return tag_bound_list
+
+
+def metric(y_true, y_pred):
+    """
+    micro, 计算整体的精确率，召回率和f1 score
+
+    Args:
+        y_true: 真实标签，[ ... ]
+        y_pred: 预测标签，[ ... ]
+
+    Returns:
+        precision: 精确率
+        recall: 召回率
+        f1:  F1 Score
+    """
+    # 找出y_true和y_pred中的实体边界
+    assert len(y_true) == len(y_pred)
+
+    with open("./data/map_dict.pkl", "rb") as f:
+        map_dict = pickle.load(f)
+        _, label2id = map_dict["label"]
+
+    true_tag_bound_list = get_tag_bound_list(y_true, label2id)
+    pred_tag_bound_list = get_tag_bound_list(y_pred, label2id)
+
+    # 计算TP, FP, FN
+    TP = 0.
+    FP = 0.
+    FN = 0.
+    for pred_tag_bound in pred_tag_bound_list:
+        if pred_tag_bound in true_tag_bound_list:  # 预测的有 P，真实的有 P => TP
+            TP += 1
+        else:  # 预测的有 P，真实的没有 N => FP
+            FP += 1
+
+    for true_tag_bound in true_tag_bound_list:
+        if true_tag_bound not in pred_tag_bound_list:  # 预测的没有 N，真实的有 P => FN
+            FN += 1
+
+    # 计算精确率、召回率、F1-Score
+    precision = TP / (TP + FP)
+    recall = TP / (TP + FN)
+    f1 = 2 * precision * recall / (precision + recall)
+
+    return precision, recall, f1
 
 
 def test(model, test_type="valid"):
@@ -107,6 +193,7 @@ def test(model, test_type="valid"):
         acc: 在测试的数据集上的准确率
 
     """
+    model.eval()
     batch_loader = BatchLoader(config.batch_size, f"prepared_{test_type}_data")
     num_of_batch, need_except = batch_loader.get_num_of_batch()
 
@@ -122,7 +209,6 @@ def test(model, test_type="valid"):
             fea_data, label_data, init_sentence_len = torch.tensor(fea_data), \
                                                       torch.tensor(label_data), \
                                                       torch.tensor(init_sentence_len)
-            # total_word_num += init_sentence_len.sum().item()
 
             _, batch_best_path = model(fea_data)
 
@@ -140,20 +226,16 @@ def test(model, test_type="valid"):
                 total_true_label = torch.cat([total_true_label, tmp_true_label], -1)
                 total_pred_label = torch.cat([total_pred_label, tmp_pred_label], -1)
 
-        # 计算loss
-        loss = model.calc_loss(fea_data, label_data)
-        test_loss += loss.mean().item()
+            # 计算loss
+            loss = model.calc_loss(fea_data, label_data)
+            test_loss += loss.mean().item()
 
     # loss
     test_loss = test_loss / num_of_batch
     # 精确率，召回率，f1_score
-    ds_precision_score, ds_recall_score, ds_f1_score = precision_score(total_true_label, total_pred_label,
-                                                                       average="micro"), \
-                                                       recall_score(total_true_label, total_pred_label,
-                                                                    average="micro"), \
-                                                       f1_score(total_true_label, total_pred_label, average="micro")
+    precision, recall, f1 = metric(total_true_label, total_pred_label)
 
-    return test_loss, ds_precision_score, ds_recall_score, ds_f1_score
+    return test_loss, precision, recall, f1
 
 
 def train(config, model, optimizer, file_name):
@@ -177,7 +259,7 @@ def train(config, model, optimizer, file_name):
         num_of_batch -= 1
 
     train_loss_list = []  # 保存每个epoch的loss
-    train_acc_list = []  # 保存每个epoch的准确率
+    train_f1_list = []  # 保存每个epoch的准确率
     valid_x = []  # 验证集的epoch下标
     valid_loss_list = []  # 验证集上的loss集合
     valid_f1_list = []  # 验证集上的f1_score集合
@@ -185,10 +267,9 @@ def train(config, model, optimizer, file_name):
 
     for epoch in range(epoch_num):
         print("=== Epoch {}/{} ===".format(epoch + 1, epoch_num))
+        model.train()
         st_time = time.time()
         train_loss = 0.0
-        train_correct = 0.0  # 预测正确的句子数
-        total_word_num = 0  # 已经处理过的word数
         total_true_label = torch.tensor([])
         total_pred_label = torch.tensor([])
 
@@ -201,7 +282,6 @@ def train(config, model, optimizer, file_name):
             fea_data, label_data, init_sentence_len = torch.tensor(fea_data), \
                                                       torch.tensor(label_data), \
                                                       torch.tensor(init_sentence_len)
-            total_word_num += init_sentence_len.sum().item()
 
             # PyTorch默认会累积梯度; 而我们需要每条样本单独算梯度，因此需要重置
             model.zero_grad()
@@ -236,19 +316,15 @@ def train(config, model, optimizer, file_name):
         train_loss = train_loss / num_of_batch
         train_loss_list.append(train_loss)
         # 精确率，召回率，f1_score
-        train_precision_score, train_recall_score, train_f1_score = precision_score(total_true_label, total_pred_label,
-                                                                                    average="micro"), \
-                                                                    recall_score(total_true_label, total_pred_label,
-                                                                                 average="micro"), \
-                                                                    f1_score(total_true_label, total_pred_label,
-                                                                             average="micro")
+        precision, recall, f1 = metric(total_true_label, total_pred_label)
+        train_f1_list.append(f1)
         # 花费时间
         ed_time = time.time()
         sp_time = ed_time - st_time
 
         print(
             "[i] loss: {:.4f}, precision_score: {:.4f}, recall_score: {:.4f}, f1_score: {:.4f}, spending time: {:.2f}s".format(
-                train_loss, train_precision_score, train_recall_score, train_f1_score, sp_time))
+                train_loss, precision, recall, f1, sp_time))
 
         # 在验证集上测试
         if (epoch + 1) % 2 == 0:
@@ -259,6 +335,7 @@ def train(config, model, optimizer, file_name):
 
             # 保存在验证集上效果最好的模型
             if valid_f1_score > valid_best_f1:
+                print("[i] 验证集上的效果: {:.4f} 优于已有的最优效果: {:.4f}".format(valid_f1_score, valid_best_f1))
                 valid_best_f1 = valid_f1_score
                 # 将训练好的模型保存到文件中
                 print(f"[i] 保存模型到文件{model_save_path}中...")
@@ -272,7 +349,7 @@ def train(config, model, optimizer, file_name):
     train_process_data = {
         "epoch_num": epoch_num,
         "train_loss_list": train_loss_list,
-        "train_acc_list": train_acc_list,
+        "train_f1_list": train_f1_list,
         "valid_x": valid_x,
         "valid_loss_list": valid_loss_list,
         "valid_f1_list": valid_f1_list
@@ -306,9 +383,9 @@ if __name__ == '__main__':
         train_process_data = pickle.load(f)
     epoch_num = train_process_data["epoch_num"]
     train_loss_list = train_process_data["train_loss_list"]
-    train_acc_list = train_process_data["train_acc_list"]
+    train_f1_list = train_process_data["train_f1_list"]
     valid_x = train_process_data["valid_x"]
     valid_loss_list = train_process_data["valid_loss_list"]
     valid_f1_list = train_process_data["valid_f1_list"]
 
-    info_plot(epoch_num, train_loss_list, train_acc_list, valid_x, valid_loss_list, valid_f1_list)
+    info_plot(epoch_num, train_loss_list, train_f1_list, valid_x, valid_loss_list, valid_f1_list)
