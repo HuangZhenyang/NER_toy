@@ -89,5 +89,5 @@ def infer(model, test_batch_num):
 
 
 if __name__ == '__main__':
-    # test_on_test_ds(model)
+    test_on_test_ds(model)
     infer(model, 1)

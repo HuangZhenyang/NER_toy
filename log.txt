@@ -123,3 +123,244 @@ D:\ProgramData\Anaconda3\envs\nlp\python.exe E:/Research/NLP/NER/NER_toy/train.p
 [i] 保存完毕
 
 Process finished with exit code 0
+
+
+
+
+
+
+
+
+D:\ProgramData\Anaconda3\envs\nlp\python.exe E:/Research/NLP/NER/NER_toy/train.py
+[i] check_pred: 训练之前测试模型的预测功能
+[i] 读取文件: ./data/prepared_train_data.pkl
+(tensor([18.3869, 18.2530, 17.4389, 16.8591, 18.0329, 17.9724, 17.2347, 18.0113]), tensor([[3, 3, 3, 3, 3, 3, 3, 3, 3],
+        [3, 3, 3, 3, 3, 3, 3, 3, 3],
+        [3, 3, 5, 3, 3, 3, 3, 3, 3],
+        [3, 3, 3, 3, 3, 3, 3, 3, 3],
+        [3, 3, 3, 3, 3, 3, 3, 3, 3],
+        [3, 3, 3, 3, 3, 3, 3, 3, 3],
+        [3, 3, 3, 5, 3, 5, 3, 3, 3],
+        [3, 3, 3, 3, 3, 3, 3, 3, 3]]))
+[i] 开始训练...
+[i] 读取文件: ./data/prepared_train_data.pkl
+=== Epoch 1/40 ===
+977it [23:48,  1.46s/it]
+  0%|          | 0/976 [00:00<?, ?it/s][i] loss: 22.6264, precision_score: 0.2462, recall_score: 0.0450, f1_score: 0.0761, spending time: 1455.45s
+=== Epoch 2/40 ===
+977it [23:49,  1.46s/it]
+[i] loss: 11.4393, precision_score: 0.8242, recall_score: 0.3100, f1_score: 0.4506, spending time: 1457.19s
+[i] 读取文件: ./data/prepared_valid_data.pkl
+100%|██████████| 122/122 [01:11<00:00,  1.70it/s]
+[i] 验证集. loss: 9.9604, precision_score: 0.8946, recall_score: 0.3445, f1_score: 0.4975
+[i] 验证集上的效果: 0.4975 优于已有的最优效果: -999.0000
+[i] 保存模型到文件./data/model.pkl中...
+[i] 保存完毕
+=== Epoch 3/40 ===
+977it [23:47,  1.46s/it]
+  0%|          | 0/976 [00:00<?, ?it/s][i] loss: 8.6317, precision_score: 0.8270, recall_score: 0.4196, f1_score: 0.5567, spending time: 1455.98s
+=== Epoch 4/40 ===
+977it [23:48,  1.46s/it]
+[i] loss: 7.1551, precision_score: 0.8207, recall_score: 0.4739, f1_score: 0.6008, spending time: 1457.29s
+[i] 读取文件: ./data/prepared_valid_data.pkl
+100%|██████████| 122/122 [01:12<00:00,  1.69it/s]
+[i] 验证集. loss: 6.7005, precision_score: 0.8480, recall_score: 0.5046, f1_score: 0.6327
+[i] 验证集上的效果: 0.6327 优于已有的最优效果: 0.4975
+[i] 保存模型到文件./data/model.pkl中...
+[i] 保存完毕
+=== Epoch 5/40 ===
+977it [23:13,  1.43s/it]
+  0%|          | 0/976 [00:00<?, ?it/s][i] loss: 6.2074, precision_score: 0.8293, recall_score: 0.5093, f1_score: 0.6310, spending time: 1423.59s
+=== Epoch 6/40 ===
+977it [22:46,  1.40s/it]
+[i] loss: 5.5047, precision_score: 0.8302, recall_score: 0.5428, f1_score: 0.6564, spending time: 1394.50s
+[i] 读取文件: ./data/prepared_valid_data.pkl
+100%|██████████| 122/122 [01:07<00:00,  1.80it/s]
+[i] 验证集. loss: 5.6433, precision_score: 0.8611, recall_score: 0.5104, f1_score: 0.6409
+[i] 验证集上的效果: 0.6409 优于已有的最优效果: 0.6327
+[i] 保存模型到文件./data/model.pkl中...
+[i] 保存完毕
+=== Epoch 7/40 ===
+977it [22:45,  1.40s/it]
+  0%|          | 0/976 [00:00<?, ?it/s][i] loss: 4.9815, precision_score: 0.8364, recall_score: 0.5704, f1_score: 0.6782, spending time: 1393.64s
+=== Epoch 8/40 ===
+977it [23:02,  1.42s/it]
+[i] loss: 4.5794, precision_score: 0.8353, recall_score: 0.5904, f1_score: 0.6918, spending time: 1410.68s
+[i] 读取文件: ./data/prepared_valid_data.pkl
+100%|██████████| 122/122 [01:10<00:00,  1.73it/s]
+[i] 验证集. loss: 4.8036, precision_score: 0.8326, recall_score: 0.6230, f1_score: 0.7127
+[i] 验证集上的效果: 0.7127 优于已有的最优效果: 0.6409
+[i] 保存模型到文件./data/model.pkl中...
+[i] 保存完毕
+=== Epoch 9/40 ===
+977it [23:12,  1.43s/it]
+  0%|          | 0/976 [00:00<?, ?it/s][i] loss: 4.2090, precision_score: 0.8347, recall_score: 0.6169, f1_score: 0.7094, spending time: 1424.93s
+=== Epoch 10/40 ===
+977it [23:16,  1.43s/it]
+[i] loss: 3.9219, precision_score: 0.8317, recall_score: 0.6338, f1_score: 0.7194, spending time: 1426.62s
+[i] 读取文件: ./data/prepared_valid_data.pkl
+100%|██████████| 122/122 [01:08<00:00,  1.77it/s]
+  0%|          | 0/976 [00:00<?, ?it/s][i] 验证集. loss: 4.2975, precision_score: 0.8015, recall_score: 0.6676, f1_score: 0.7285
+[i] 验证集上的效果: 0.7285 优于已有的最优效果: 0.7127
+[i] 保存模型到文件./data/model.pkl中...
+[i] 保存完毕
+=== Epoch 11/40 ===
+977it [22:59,  1.41s/it]
+  0%|          | 0/976 [00:00<?, ?it/s][i] loss: 3.6857, precision_score: 0.8351, recall_score: 0.6464, f1_score: 0.7287, spending time: 1409.20s
+=== Epoch 12/40 ===
+977it [22:56,  1.41s/it]
+[i] loss: 3.4782, precision_score: 0.8375, recall_score: 0.6673, f1_score: 0.7428, spending time: 1407.92s
+[i] 读取文件: ./data/prepared_valid_data.pkl
+100%|██████████| 122/122 [01:06<00:00,  1.83it/s]
+  0%|          | 0/976 [00:00<?, ?it/s][i] 验证集. loss: 4.2840, precision_score: 0.8885, recall_score: 0.5777, f1_score: 0.7002
+=== Epoch 13/40 ===
+977it [23:01,  1.41s/it]
+  0%|          | 0/976 [00:00<?, ?it/s][i] loss: 3.3189, precision_score: 0.8431, recall_score: 0.6742, f1_score: 0.7492, spending time: 1409.66s
+=== Epoch 14/40 ===
+977it [22:57,  1.41s/it]
+[i] loss: 3.1414, precision_score: 0.8406, recall_score: 0.6887, f1_score: 0.7571, spending time: 1409.55s
+[i] 读取文件: ./data/prepared_valid_data.pkl
+100%|██████████| 122/122 [01:06<00:00,  1.84it/s]
+[i] 验证集. loss: 3.8725, precision_score: 0.8092, recall_score: 0.7036, f1_score: 0.7527
+[i] 验证集上的效果: 0.7527 优于已有的最优效果: 0.7285
+[i] 保存模型到文件./data/model.pkl中...
+[i] 保存完毕
+=== Epoch 15/40 ===
+977it [23:00,  1.41s/it]
+  0%|          | 0/976 [00:00<?, ?it/s][i] loss: 3.0155, precision_score: 0.8439, recall_score: 0.6988, f1_score: 0.7645, spending time: 1409.08s
+=== Epoch 16/40 ===
+977it [22:58,  1.41s/it]
+[i] loss: 2.8869, precision_score: 0.8505, recall_score: 0.7059, f1_score: 0.7715, spending time: 1408.75s
+[i] 读取文件: ./data/prepared_valid_data.pkl
+100%|██████████| 122/122 [01:05<00:00,  1.86it/s]
+  0%|          | 0/976 [00:00<?, ?it/s][i] 验证集. loss: 3.6459, precision_score: 0.8275, recall_score: 0.6955, f1_score: 0.7558
+[i] 验证集上的效果: 0.7558 优于已有的最优效果: 0.7527
+[i] 保存模型到文件./data/model.pkl中...
+[i] 保存完毕
+=== Epoch 17/40 ===
+977it [22:59,  1.41s/it]
+  0%|          | 0/976 [00:00<?, ?it/s][i] loss: 2.7738, precision_score: 0.8486, recall_score: 0.7159, f1_score: 0.7766, spending time: 1408.47s
+=== Epoch 18/40 ===
+977it [22:59,  1.41s/it]
+[i] loss: 2.6619, precision_score: 0.8495, recall_score: 0.7245, f1_score: 0.7821, spending time: 1411.05s
+[i] 读取文件: ./data/prepared_valid_data.pkl
+100%|██████████| 122/122 [01:08<00:00,  1.77it/s]
+[i] 验证集. loss: 3.6417, precision_score: 0.8497, recall_score: 0.6560, f1_score: 0.7404
+=== Epoch 19/40 ===
+977it [22:57,  1.41s/it]
+  0%|          | 0/976 [00:00<?, ?it/s][i] loss: 2.5814, precision_score: 0.8544, recall_score: 0.7335, f1_score: 0.7893, spending time: 1405.84s
+=== Epoch 20/40 ===
+977it [23:00,  1.41s/it]
+[i] loss: 2.4813, precision_score: 0.8579, recall_score: 0.7389, f1_score: 0.7939, spending time: 1410.08s
+[i] 读取文件: ./data/prepared_valid_data.pkl
+100%|██████████| 122/122 [01:06<00:00,  1.84it/s]
+  0%|          | 0/976 [00:00<?, ?it/s][i] 验证集. loss: 3.3974, precision_score: 0.8282, recall_score: 0.7158, f1_score: 0.7679
+[i] 验证集上的效果: 0.7679 优于已有的最优效果: 0.7558
+[i] 保存模型到文件./data/model.pkl中...
+[i] 保存完毕
+=== Epoch 21/40 ===
+977it [22:56,  1.41s/it]
+[i] loss: 2.4148, precision_score: 0.8600, recall_score: 0.7464, f1_score: 0.7992, spending time: 1405.47s
+=== Epoch 22/40 ===
+977it [23:00,  1.41s/it]
+[i] loss: 2.3244, precision_score: 0.8631, recall_score: 0.7542, f1_score: 0.8050, spending time: 1409.08s
+[i] 读取文件: ./data/prepared_valid_data.pkl
+100%|██████████| 122/122 [01:06<00:00,  1.83it/s]
+  0%|          | 0/976 [00:00<?, ?it/s][i] 验证集. loss: 3.3524, precision_score: 0.8202, recall_score: 0.7303, f1_score: 0.7726
+[i] 验证集上的效果: 0.7726 优于已有的最优效果: 0.7679
+[i] 保存模型到文件./data/model.pkl中...
+[i] 保存完毕
+=== Epoch 23/40 ===
+977it [23:00,  1.41s/it]
+[i] loss: 2.2295, precision_score: 0.8685, recall_score: 0.7625, f1_score: 0.8121, spending time: 1408.78s
+=== Epoch 24/40 ===
+977it [23:00,  1.41s/it]
+[i] loss: 2.1813, precision_score: 0.8695, recall_score: 0.7680, f1_score: 0.8156, spending time: 1408.80s
+[i] 读取文件: ./data/prepared_valid_data.pkl
+100%|██████████| 122/122 [01:07<00:00,  1.82it/s]
+  0%|          | 0/976 [00:00<?, ?it/s][i] 验证集. loss: 3.3474, precision_score: 0.8417, recall_score: 0.7030, f1_score: 0.7661
+=== Epoch 25/40 ===
+977it [23:00,  1.41s/it]
+  0%|          | 0/976 [00:00<?, ?it/s][i] loss: 2.1214, precision_score: 0.8706, recall_score: 0.7738, f1_score: 0.8193, spending time: 1409.28s
+=== Epoch 26/40 ===
+977it [23:04,  1.42s/it]
+[i] loss: 2.0510, precision_score: 0.8755, recall_score: 0.7802, f1_score: 0.8251, spending time: 1412.90s
+[i] 读取文件: ./data/prepared_valid_data.pkl
+100%|██████████| 122/122 [01:08<00:00,  1.78it/s]
+  0%|          | 0/976 [00:00<?, ?it/s][i] 验证集. loss: 3.3011, precision_score: 0.8364, recall_score: 0.7268, f1_score: 0.7778
+[i] 验证集上的效果: 0.7778 优于已有的最优效果: 0.7726
+[i] 保存模型到文件./data/model.pkl中...
+[i] 保存完毕
+=== Epoch 27/40 ===
+977it [22:59,  1.41s/it]
+  0%|          | 0/976 [00:00<?, ?it/s][i] loss: 1.9843, precision_score: 0.8750, recall_score: 0.7864, f1_score: 0.8283, spending time: 1407.83s
+=== Epoch 28/40 ===
+977it [22:59,  1.41s/it]
+[i] loss: 1.9446, precision_score: 0.8770, recall_score: 0.7896, f1_score: 0.8310, spending time: 1407.91s
+[i] 读取文件: ./data/prepared_valid_data.pkl
+100%|██████████| 122/122 [01:08<00:00,  1.78it/s]
+[i] 验证集. loss: 3.2674, precision_score: 0.8190, recall_score: 0.7454, f1_score: 0.7804
+[i] 验证集上的效果: 0.7804 优于已有的最优效果: 0.7778
+[i] 保存模型到文件./data/model.pkl中...
+[i] 保存完毕
+=== Epoch 29/40 ===
+977it [23:00,  1.41s/it]
+  0%|          | 0/976 [00:00<?, ?it/s][i] loss: 1.8875, precision_score: 0.8819, recall_score: 0.7962, f1_score: 0.8369, spending time: 1409.91s
+=== Epoch 30/40 ===
+977it [23:03,  1.42s/it]
+[i] loss: 1.8314, precision_score: 0.8840, recall_score: 0.8035, f1_score: 0.8418, spending time: 1412.17s
+[i] 读取文件: ./data/prepared_valid_data.pkl
+100%|██████████| 122/122 [01:08<00:00,  1.77it/s]
+  0%|          | 0/976 [00:00<?, ?it/s][i] 验证集. loss: 3.3231, precision_score: 0.8221, recall_score: 0.7372, f1_score: 0.7774
+=== Epoch 31/40 ===
+977it [22:57,  1.41s/it]
+  0%|          | 0/976 [00:00<?, ?it/s][i] loss: 1.7889, precision_score: 0.8827, recall_score: 0.8041, f1_score: 0.8416, spending time: 1408.59s
+=== Epoch 32/40 ===
+977it [23:01,  1.41s/it]
+[i] loss: 1.7553, precision_score: 0.8872, recall_score: 0.8124, f1_score: 0.8482, spending time: 1410.40s
+[i] 读取文件: ./data/prepared_valid_data.pkl
+100%|██████████| 122/122 [01:08<00:00,  1.78it/s]
+  0%|          | 0/976 [00:00<?, ?it/s][i] 验证集. loss: 3.2408, precision_score: 0.8202, recall_score: 0.7407, f1_score: 0.7784
+=== Epoch 33/40 ===
+977it [23:02,  1.41s/it]
+  0%|          | 0/976 [00:00<?, ?it/s][i] loss: 1.7106, precision_score: 0.8883, recall_score: 0.8149, f1_score: 0.8500, spending time: 1413.74s
+=== Epoch 34/40 ===
+977it [22:46,  1.40s/it]
+[i] loss: 1.6778, precision_score: 0.8908, recall_score: 0.8187, f1_score: 0.8532, spending time: 1394.77s
+[i] 读取文件: ./data/prepared_valid_data.pkl
+100%|██████████| 122/122 [01:11<00:00,  1.70it/s]
+  0%|          | 0/976 [00:00<?, ?it/s][i] 验证集. loss: 3.3140, precision_score: 0.8526, recall_score: 0.7013, f1_score: 0.7696
+=== Epoch 35/40 ===
+977it [23:19,  1.43s/it]
+  0%|          | 0/976 [00:00<?, ?it/s][i] loss: 1.6280, precision_score: 0.8921, recall_score: 0.8238, f1_score: 0.8566, spending time: 1429.77s
+=== Epoch 36/40 ===
+977it [23:05,  1.42s/it]
+[i] loss: 1.5948, precision_score: 0.8961, recall_score: 0.8266, f1_score: 0.8600, spending time: 1414.42s
+[i] 读取文件: ./data/prepared_valid_data.pkl
+100%|██████████| 122/122 [01:06<00:00,  1.83it/s]
+[i] 验证集. loss: 3.3775, precision_score: 0.8442, recall_score: 0.7106, f1_score: 0.7717
+=== Epoch 37/40 ===
+977it [23:15,  1.43s/it]
+[i] loss: 1.5567, precision_score: 0.8940, recall_score: 0.8275, f1_score: 0.8595, spending time: 1428.86s
+=== Epoch 38/40 ===
+977it [23:30,  1.44s/it]
+[i] loss: 1.5112, precision_score: 0.8992, recall_score: 0.8335, f1_score: 0.8651, spending time: 1446.39s
+[i] 读取文件: ./data/prepared_valid_data.pkl
+100%|██████████| 122/122 [01:08<00:00,  1.79it/s]
+[i] 验证集. loss: 3.2850, precision_score: 0.8429, recall_score: 0.7222, f1_score: 0.7779
+=== Epoch 39/40 ===
+977it [23:18,  1.43s/it]
+  0%|          | 0/976 [00:00<?, ?it/s][i] loss: 1.4748, precision_score: 0.8980, recall_score: 0.8344, f1_score: 0.8650, spending time: 1427.60s
+=== Epoch 40/40 ===
+977it [23:06,  1.42s/it]
+[i] loss: 1.4352, precision_score: 0.9000, recall_score: 0.8383, f1_score: 0.8680, spending time: 1415.11s
+[i] 读取文件: ./data/prepared_valid_data.pkl
+100%|██████████| 122/122 [01:08<00:00,  1.79it/s]
+[i] 验证集. loss: 3.1981, precision_score: 0.8398, recall_score: 0.7448, f1_score: 0.7894
+[i] 验证集上的效果: 0.7894 优于已有的最优效果: 0.7804
+[i] 保存模型到文件./data/model.pkl中...
+[i] 保存完毕
+[i] 保存训练过程数据到文件./data/train_process_data.pkl中...
+[i] 保存完毕
+
+Process finished with exit code 0

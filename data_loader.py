@@ -87,30 +87,33 @@ def prepare_data(file_name="train") -> None:
             sentence_fea_list.append(fea_num_seq)
         one_sen_fea_list.append(sentence_fea_list)
 
-    # 数据增强，将两个句子、三个句子的特征拼接
-    print("[i] 数据增强，多个句子特征进行拼接")
-    for i in tqdm(range(len(one_sen_fea_list) - 1), ascii=True):
-        first_matrix = one_sen_fea_list[i]
-        second_matrix = one_sen_fea_list[i + 1]
-        enhanced_matrix = [first_matrix[j] + second_matrix[j] for j in range(len(first_matrix))]  # 将对应维度的特征数据进行拼接
-        two_sen_fea_list.append(enhanced_matrix)
+    # # 数据增强，将两个句子、三个句子的特征拼接
+    # print("[i] 数据增强，多个句子特征进行拼接")
+    # for i in tqdm(range(len(one_sen_fea_list) - 1), ascii=True):
+    #     first_matrix = one_sen_fea_list[i]
+    #     second_matrix = one_sen_fea_list[i + 1]
+    #     enhanced_matrix = [first_matrix[j] + second_matrix[j] for j in range(len(first_matrix))]  # 将对应维度的特征数据进行拼接
+    #     two_sen_fea_list.append(enhanced_matrix)
+    #
+    # for i in tqdm(range(len(one_sen_fea_list) - 2), ascii=True):
+    #     first_matrix = one_sen_fea_list[i]
+    #     second_matrix = one_sen_fea_list[i + 1]
+    #     third_matrix = one_sen_fea_list[i + 2]
+    #     enhanced_matrix = [first_matrix[j] + second_matrix[j] + third_matrix[j] for j in
+    #                        range(len(first_matrix))]  # 将对应维度的特征数据进行拼接
+    #     three_sen_fea_list.append(enhanced_matrix)
+    #
+    # # 通过extend将所有的数据都合在一起
+    # # [
+    # #   [[word特征值],[label特征值],...,[pinyin特征值]]_{句子1},
+    # #   [[word特征值],[label特征值],...,[pinyin特征值]]_{句子2}, ...
+    # #   [[word特征值],[label特征值],...,[pinyin特征值]]_{增强的句子1}, ...
+    # # ]
+    # prepared_data_list = []  # 保存所有处理好的数据
+    # prepared_data_list.extend(one_sen_fea_list + two_sen_fea_list + three_sen_fea_list)
 
-    for i in tqdm(range(len(one_sen_fea_list) - 2), ascii=True):
-        first_matrix = one_sen_fea_list[i]
-        second_matrix = one_sen_fea_list[i + 1]
-        third_matrix = one_sen_fea_list[i + 2]
-        enhanced_matrix = [first_matrix[j] + second_matrix[j] + third_matrix[j] for j in
-                           range(len(first_matrix))]  # 将对应维度的特征数据进行拼接
-        three_sen_fea_list.append(enhanced_matrix)
-
-    # 通过extend将所有的数据都合在一起
-    # [
-    #   [[word特征值],[label特征值],...,[pinyin特征值]]_{句子1},
-    #   [[word特征值],[label特征值],...,[pinyin特征值]]_{句子2}, ...
-    #   [[word特征值],[label特征值],...,[pinyin特征值]]_{增强的句子1}, ...
-    # ]
     prepared_data_list = []  # 保存所有处理好的数据
-    prepared_data_list.extend(one_sen_fea_list + two_sen_fea_list + three_sen_fea_list)
+    prepared_data_list.extend(one_sen_fea_list)
 
     # 保存到文件中
     save_file_path = os.path.join(data_root_dir, f"prepared_{file_name}_data.pkl")

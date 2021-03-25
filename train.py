@@ -23,7 +23,7 @@ model_save_path = "./data/model.pkl"
 process_data_save_path = "./data/train_process_data.pkl"
 # 解析参数
 parser = argparse.ArgumentParser(description="Pytorch NER Toy")
-parser.add_argument('--epoch', type=int, help='Number of epoch', default=20)
+parser.add_argument('--epoch', type=int, help='Number of epoch', default=100)
 parser.add_argument('--batch_size', type=int, help='Batch size', default=8)
 parser.add_argument('--hidden_dim', type=int, help='Hidden dimension of BiLSTM', default=128)
 parser.add_argument('--word_embed_dim', type=int, help='Word embedding dimension', default=100)
@@ -286,7 +286,7 @@ def train(config, model, optimizer, file_name):
             # PyTorch默认会累积梯度; 而我们需要每条样本单独算梯度，因此需要重置
             model.zero_grad()
 
-            _, batch_best_path = model.forward(fea_data)
+            _, batch_best_path = model(fea_data)
 
             if (not total_true_label.numel()) and (not total_pred_label.numel()):  # 如果还未初始化
                 total_true_label = torch.cat(
