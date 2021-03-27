@@ -65,6 +65,7 @@ def infer(model, test_batch_num):
 
         # 打印预测和真实的差距
         print("word           pred_label     real_label     correct?")
+        print("-----------------------------------------------------")
         for i in range(config.batch_size):  # 对于每个句子
             print(f"[i] === 句子[{i + 1}] ===")
             sentence_word = word_idx_data[i]
