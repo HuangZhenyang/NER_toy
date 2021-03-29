@@ -133,6 +133,7 @@ class BiLSTMCRF(nn.Module):
 
         # 全连接层，将LSTM的输出映射到标签的向量空间
         self.hidden2tag = nn.Linear(self.hidden_dim, self.tagset_size)
+        self.dropout = nn.Dropout(p=0.2)
 
         # === CRF ===
         # 转移矩阵的参数。[i][j] 是从i转移到j的得分
@@ -197,6 +198,7 @@ class BiLSTMCRF(nn.Module):
         lstm_out, self.hidden = self.lstm(embeds, self.hidden)
         # print(f"[i] lstm_out的维度：{lstm_out.shape}")
         lstm_feats = self.hidden2tag(lstm_out)
+        lstm_feats = self.dropout(lstm_feats)
         # print(f"[i] BiLSTM输出的lstm_feats维度：{lstm_feats.shape}")
 
         return lstm_feats
